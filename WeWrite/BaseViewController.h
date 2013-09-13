@@ -15,4 +15,7 @@
 @property (nonatomic, retain) UITextView *textView;
 @property (nonatomic, retain) TextViewDelegate *delegate;
 
+@property (nonatomic, retain) UIButton *undoButton;
+@property (nonatomic, retain) UIButton *redoButton;
+
 @end

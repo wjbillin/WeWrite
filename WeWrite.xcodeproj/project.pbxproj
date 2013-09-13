@@ -96,6 +96,8 @@
 		B3709EB817E1701F00FAEE34 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B3709EB717E1701F00FAEE34 /* libz.dylib */; };
 		B3709EBD17E17C7C00FAEE34 /* TextViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709EBC17E17C7C00FAEE34 /* TextViewDelegate.m */; };
 		B3709EBE17E17C7C00FAEE34 /* TextViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709EBC17E17C7C00FAEE34 /* TextViewDelegate.m */; };
+		B3709EC117E2749800FAEE34 /* Deque.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709EC017E2749800FAEE34 /* Deque.m */; };
+		B3709EC217E2749800FAEE34 /* Deque.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709EC017E2749800FAEE34 /* Deque.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -222,6 +224,8 @@
 		B3709EB917E1786900FAEE34 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		B3709EBB17E17C7B00FAEE34 /* TextViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextViewDelegate.h; sourceTree = "<group>"; };
 		B3709EBC17E17C7C00FAEE34 /* TextViewDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextViewDelegate.m; sourceTree = "<group>"; };
+		B3709EBF17E2749800FAEE34 /* Deque.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Deque.h; sourceTree = "<group>"; };
+		B3709EC017E2749800FAEE34 /* Deque.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Deque.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -297,6 +301,8 @@
 				B3709DF217E146C300FAEE34 /* MainStoryboard_iPad.storyboard */,
 				B3709DF517E146C300FAEE34 /* BaseViewController.h */,
 				B3709DF617E146C300FAEE34 /* BaseViewController.m */,
+				B3709EBF17E2749800FAEE34 /* Deque.h */,
+				B3709EC017E2749800FAEE34 /* Deque.m */,
 				B3709EBB17E17C7B00FAEE34 /* TextViewDelegate.h */,
 				B3709EBC17E17C7C00FAEE34 /* TextViewDelegate.m */,
 				B3709DDE17E146C300FAEE34 /* Supporting Files */,
@@ -616,6 +622,7 @@
 				B3709EB117E16ED400FAEE34 /* wire_format.cc in Sources */,
 				B3709EB317E16ED400FAEE34 /* wire_format_lite.cc in Sources */,
 				B3709EBD17E17C7C00FAEE34 /* TextViewDelegate.m in Sources */,
+				B3709EC117E2749800FAEE34 /* Deque.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -658,6 +665,7 @@
 				B3709EB217E16ED400FAEE34 /* wire_format.cc in Sources */,
 				B3709EB417E16ED400FAEE34 /* wire_format_lite.cc in Sources */,
 				B3709EBE17E17C7C00FAEE34 /* TextViewDelegate.m in Sources */,
+				B3709EC217E2749800FAEE34 /* Deque.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

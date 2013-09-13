@@ -8,10 +8,16 @@
 
 #import <Foundation/Foundation.h>
 
+@class Deque;
 @interface TextViewDelegate : NSObject<UITextViewDelegate> {
   // No explicit member variables. Properties.
 }
 
 @property (nonatomic, assign) NSInteger count;
+@property (nonatomic, retain) Deque *redoStack;
+@property (nonatomic, retain) Deque *undoStack;
+
+- (void)undo:(UITextView *)textView;
+- (void)redo:(UITextView *)textView;
 
 @end

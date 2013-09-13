@@ -22,6 +22,9 @@
   if (self = [super init]) {
     _textView = [[UITextView alloc] init];
     _delegate = [[TextViewDelegate alloc] init];
+    
+    _undoButton = [[UIButton alloc] init];
+    _redoButton = [[UIButton alloc] init];
   }
     
   return self;
@@ -29,7 +32,24 @@
 
 - (void)viewWillAppear:(BOOL)animated {
   [self setUpTextView];
-  [self.view addSubview:self.textView];
+  [self setUpButtons];
+}
+
+- (void)setUpButtons {
+  self.undoButton.frame = CGRectMake(10, 10, 100, 30);
+  [self.undoButton setTitle:@"Undo" forState:UIControlStateNormal];
+  [self.undoButton addTarget:self
+                      action:@selector(undo)
+            forControlEvents:UIControlEventTouchUpInside];
+  
+  self.redoButton.frame = CGRectMake(170, 10, 100, 30);
+  [self.redoButton setTitle:@"Redo" forState:UIControlStateNormal];
+  [self.redoButton addTarget:self
+                      action:@selector(redo)
+            forControlEvents:UIControlEventTouchUpInside];
+  
+  [self.view addSubview:self.undoButton];
+  [self.view addSubview:self.redoButton];
 }
 
 - (void)setUpTextView {
@@ -40,13 +60,15 @@
                                      screenSize.height - TOP_TOOLBAR_HEIGHT)];
   [self.textView setDelegate:self.delegate];
   
-  NSLog(@"Hi, screen width is %f and height is %f", screenSize.width, screenSize.height);
+  [self.view addSubview:self.textView];
 }
 
-- (void)didReceiveMemoryWarning
-{
-  [super didReceiveMemoryWarning];
-  // Dispose of any resources that can be recreated.
+- (void)undo {
+  [self.delegate undo:self.textView];
+}
+
+- (void)redo {
+  [self.delegate redo:self.textView];
 }
 
 @end
