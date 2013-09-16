@@ -16,6 +16,8 @@
 @property (nonatomic, assign) NSInteger count;
 @property (nonatomic, retain) Deque *redoStack;
 @property (nonatomic, retain) Deque *undoStack;
+@property (nonatomic, retain) Deque *currentEdit;
+@property (nonatomic, retain) NSTimer *timer;
 
 - (void)undo:(UITextView *)textView;
 - (void)redo:(UITextView *)textView;

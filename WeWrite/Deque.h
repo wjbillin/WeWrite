@@ -12,10 +12,13 @@
 
 @property (nonatomic, retain) NSMutableArray *array;
 
+- (void)clear;
+- (BOOL)empty;
 - (id)frontQueue;
 - (id)frontStack;
 - (id)popQueue;
 - (id)popStack;
 - (void)push:(id)object;
+- (NSUInteger)size;
 
 @end

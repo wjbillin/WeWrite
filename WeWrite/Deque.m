@@ -18,6 +18,14 @@
   return self;
 }
 
+- (void)clear {
+  [self.array removeAllObjects];
+}
+
+- (BOOL)empty {
+  return (self.array.count == 0);
+}
+
 - (id)frontStack {
   return [self.array lastObject];
 }
@@ -48,6 +56,10 @@
   }
   
   return firstObject;
+}
+
+- (NSUInteger)size {
+  return self.array.count;
 }
 
 @end
