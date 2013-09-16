@@ -67,7 +67,6 @@ typedef enum {
     _redoStack = [[Deque alloc] init];
     _undoStack = [[Deque alloc] init];
     _currentEdit = [[Deque alloc] init];
-    _timer = [[NSTimer alloc] init];
   }
   
   return self;
@@ -82,8 +81,6 @@ typedef enum {
         range.length,
         textView.selectedRange.location,
         text);
-  
-  // Reset timer.
   
   if (range.location == 0 && range.length == 0 && text.length == 0) {
     // User is backspacing at the beginning of the document. Don't bother recording anything.
@@ -107,6 +104,16 @@ typedef enum {
     // This action is an add.
     [self.currentEdit push:[[TextAction alloc] init:range text:text]];
   }
+  
+  // If the timer is currently running, we want to stop it before scheduling it again.
+  if (self.timer && self.timer.isValid) {
+    [self.timer invalidate];
+  }
+  self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0
+                                                target:self
+                                              selector:@selector(mergeCurrentEdit)
+                                              userInfo:nil
+                                               repeats:NO];
 
   return YES;
 }
@@ -137,6 +144,11 @@ typedef enum {
           lastAction.range.length,
           lastAction.text);
   }
+}
+
+- (void)textViewDidChangeSelection:(UITextView *)textView {
+  // User has moved their cursor. Merge any pending edits.
+  [self mergeCurrentEdit];
 }
 
 - (void)mergeCurrentEdit {
@@ -246,6 +258,9 @@ typedef enum {
   while ((mergedAction = [finalActions popQueue])) {
     NSLog(@"Final action entry: location: %d, length: %d, text: [%@]", mergedAction.range.location,
           mergedAction.range.length, mergedAction.text);
+    
+    // Eventually break this out.
+    [self.undoStack push:mergedAction];
   }
   
 }
@@ -254,9 +269,6 @@ typedef enum {
 #pragma mark Undo
 
 - (void)undo:(UITextView *)textView {
-  [self mergeCurrentEdit];
-  
-  /*
   TextAction *lastAction = [self.undoStack popStack];
   
   if (lastAction) {
@@ -270,7 +282,7 @@ typedef enum {
       [self undoAdd:lastAction text:textView.text];
     }
     [self.redoStack push:lastAction];
-  }*/
+  }
 }
 
 - (void)undoAdd:(TextAction *)addAction text:(NSString *)text {
