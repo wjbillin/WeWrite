@@ -14,8 +14,8 @@
 
 - (void)clear;
 - (BOOL)empty;
-- (id)frontQueue;
-- (id)frontStack;
+- (id)front;
+- (id)back;
 - (id)popQueue;
 - (id)popStack;
 - (void)push:(id)object;

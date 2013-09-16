@@ -114,7 +114,7 @@ typedef enum {
 - (void)textViewDidChange:(UITextView *)textView {
   NSLog(@"TextViewDidChange callback, selected position: %d", textView.selectedRange.location);
   
-  TextAction *lastAction = [self.currentEdit frontStack];
+  TextAction *lastAction = [self.currentEdit front];
   NSUInteger currentCursor = textView.selectedRange.location;
   
   if (lastAction && lastAction.range.length > 0 && currentCursor == (lastAction.range.location - 1)) {
@@ -165,13 +165,88 @@ typedef enum {
   }
   
   // Debug print.
+  Deque *mergedActionsTemp = [[Deque alloc] init];
   while ((mergedAction = [mergedActions popQueue])) {
     NSLog(@"Merged action entry: location: %d, length: %d, text: [%@]", mergedAction.range.location,
           mergedAction.range.length, mergedAction.text);
+    [mergedActionsTemp push:mergedAction];
   }
+  mergedActions = mergedActionsTemp;
+  
+  Deque *finalActions = [[Deque alloc] init];
   
   // Now, merge individual add/delete sequences as much as possible.
-  int smallestIndex = ((TextAction *)[mergedActions frontQueue]).range.location;
+  if ([mergedActions empty]) {
+    return;
+  }
+  if ([mergedActions size] == 1) {
+    // Send off command.
+    TextAction *action = [mergedActions front];
+    NSLog(@"Single action: location: %d, length: %d, text: %@",
+          action.range.location,
+          action.range.length,
+          action.text);
+    [finalActions push:[mergedActions popQueue]];
+    return;
+  }
+  
+  TextAction* lastAction = [mergedActions back];
+  int smallestIndex, ogCursorIndex;
+  smallestIndex = ogCursorIndex = lastAction.range.location;
+  NSLog(@"smallest index is %d", smallestIndex);
+  
+  TextAction *curAction = [mergedActions popQueue];
+  [finalActions push:curAction];
+  
+  while ((curAction = [mergedActions popQueue])) {
+    TextAction* lastAction = [finalActions front];
+    if (curAction.editType == DELETE) {
+      if (curAction.range.location < smallestIndex) {
+        int netDeletionLength = ogCursorIndex - curAction.range.location;
+        curAction.range = NSMakeRange(curAction.range.location, netDeletionLength);
+        
+        TextAction* ogDeleteAction = [finalActions back];
+        if (ogDeleteAction.editType == DELETE && ogDeleteAction != curAction) {
+          NSLog(@"Smallest index is %d and curAction location is %d", smallestIndex, curAction.range.location);
+          curAction.text =
+              [NSString stringWithFormat:@"%@%@",
+                  [curAction.text substringToIndex:(smallestIndex - curAction.range.location)],
+                  ogDeleteAction.text];
+          
+          curAction.range = NSMakeRange(curAction.range.location, curAction.text.length);
+        } else {
+          curAction.text = [curAction.text substringToIndex:ogCursorIndex - curAction.range.location];
+        }
+        
+        [finalActions clear];
+        [finalActions push:curAction];
+        smallestIndex = curAction.range.location;
+      } else {
+        lastAction.text =
+            [lastAction.text substringToIndex:(lastAction.text.length - curAction.range.length)];
+        
+        if (!lastAction.text.length) {
+          // We've wiped out EVERYTHING.
+          [finalActions popStack];
+        }
+      }
+    } else if (curAction.editType == INSERT) {
+      if (!lastAction || lastAction.editType == DELETE) {
+        [finalActions push:curAction];
+        if([lastAction.text isEqualToString:curAction.text]) {
+          [finalActions clear];
+        }
+      } else {
+        lastAction.text = [lastAction.text stringByAppendingString:curAction.text];
+      }
+    }
+  }
+  
+  // Debug print.
+  while ((mergedAction = [finalActions popQueue])) {
+    NSLog(@"Final action entry: location: %d, length: %d, text: [%@]", mergedAction.range.location,
+          mergedAction.range.length, mergedAction.text);
+  }
   
 }
 

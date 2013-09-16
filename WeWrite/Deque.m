@@ -26,11 +26,11 @@
   return (self.array.count == 0);
 }
 
-- (id)frontStack {
+- (id)front {
   return [self.array lastObject];
 }
 
-- (id)frontQueue {
+- (id)back {
   return (self.array.count > 0) ? [self.array objectAtIndex:0] : nil;
 }
 
