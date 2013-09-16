@@ -158,17 +158,21 @@ typedef enum {
         mergedAction.text = (mergedAction.text) ?
             [singleAction.text stringByAppendingString:mergedAction.text] : singleAction.text;
       } else if (singleAction.editType == INSERT) {
-        mergedAction.range = singleAction.range;
         mergedAction.text = (mergedAction.text) ?
             [mergedAction.text stringByAppendingString:singleAction.text] : singleAction.text;
       }
     }
   }
   
+  // Debug print.
   while ((mergedAction = [mergedActions popQueue])) {
     NSLog(@"Merged action entry: location: %d, length: %d, text: [%@]", mergedAction.range.location,
           mergedAction.range.length, mergedAction.text);
   }
+  
+  // Now, merge individual add/delete sequences as much as possible.
+  int smallestIndex = ((TextAction *)[mergedActions frontQueue]).range.location;
+  
 }
 
 #pragma mark -
