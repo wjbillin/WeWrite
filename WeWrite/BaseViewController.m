@@ -64,7 +64,6 @@
 }
 
 - (void)undo {
-  NSLog(@"calling undo");
   [self.delegate undo:self.textView];
 }
 

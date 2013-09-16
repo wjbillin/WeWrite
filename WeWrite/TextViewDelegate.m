@@ -76,11 +76,11 @@ typedef enum {
     shouldChangeTextInRange:(NSRange)range
             replacementText:(NSString *)text {
   
-  NSLog(@"Delegate called, location: %d, length: %d, selected location: %d, text is [%@]",
+  /*NSLog(@"Delegate called, location: %d, length: %d, selected location: %d, text is [%@]",
         range.location,
         range.length,
         textView.selectedRange.location,
-        text);
+        text);*/
   
   if (range.location == 0 && range.length == 0 && text.length == 0) {
     // User is backspacing at the beginning of the document. Don't bother recording anything.
@@ -106,20 +106,16 @@ typedef enum {
   }
   
   // If the timer is currently running, we want to stop it before scheduling it again.
-  if (self.timer && self.timer.isValid) {
-    [self.timer invalidate];
-  }
-  self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0
-                                                target:self
-                                              selector:@selector(mergeCurrentEdit)
-                                              userInfo:nil
-                                               repeats:NO];
+  [self resetTimer];
+  
+  // Clear the redo stack if we're editing.
+  [self.redoStack clear];
 
   return YES;
 }
 
 - (void)textViewDidChange:(UITextView *)textView {
-  NSLog(@"TextViewDidChange callback, selected position: %d", textView.selectedRange.location);
+  //NSLog(@"TextViewDidChange callback, selected position: %d", textView.selectedRange.location);
   
   TextAction *lastAction = [self.currentEdit front];
   NSUInteger currentCursor = textView.selectedRange.location;
@@ -155,85 +151,109 @@ typedef enum {
 }
 
 - (void)mergeCurrentEdit {
-  TextAction *singleAction  = [[TextAction alloc] init];
-  TextAction *mergedAction = [[TextAction alloc] init];
-  
-  Deque *mergedActions = [[Deque alloc] init];
-    
-  while ((singleAction = [self.currentEdit popQueue])) {
-    if ([mergedActions empty] || mergedAction.editType != singleAction.editType) {
-      // This is the first action or the actions are different.
-      [mergedActions push:singleAction];
-      mergedAction = singleAction;
-    } else {
-      // The actions are of the same type. Merge them.
-      if (singleAction.editType == DELETE) {
-        mergedAction.range =
-            NSMakeRange(singleAction.range.location, mergedAction.range.length + singleAction.range.length);
-        mergedAction.text = (mergedAction.text) ?
-            [singleAction.text stringByAppendingString:mergedAction.text] : singleAction.text;
-      } else if (singleAction.editType == INSERT) {
-        mergedAction.text = (mergedAction.text) ?
-            [mergedAction.text stringByAppendingString:singleAction.text] : singleAction.text;
-      }
-    }
-  }
+  Deque *mergedEdits = [self mergeSingleEdits];
   
   // Debug print.
-  [self printQueue:mergedActions];
+  [self printQueue:mergedEdits];
   
-  if ([mergedActions empty]) {
+  if ([mergedEdits empty]) {
     return;
   }
   
   // Now, merge individual add/delete sequences as much as possible.
-  Deque *finalActions = [[Deque alloc] init];
+  Deque *finalEdits = [self resolveMergedEdits:mergedEdits];
   
-  TextAction* lastAction = [mergedActions back];
+  // Debug print.
+  [self printQueue:finalEdits];
+  
+  // Put the actions in the undo stack.
+  TextAction *curAction;
+  while ((curAction = [finalEdits popQueue])) {
+    [self.undoStack push:curAction];
+  }
+}
+
+// Merge a series of single edits (i.e. (INSERT, 6, 'h'), (INSERT, 7, 'i')) into a series of merged edits
+// (i.e. (INSERT, 6, 'hi')). However, this function makes no effort to resolve these 'merged edits'
+// (i.e. (INSERT, 4, 'here'), (REMOVE, 2, 're'), (INSERT, 1, 'm') is NOT resolved to the single edit
+// (INSERT, 3, 'hem'), although it is semantically correct to do so. For that functionality, please see
+// resolveMergedEdits.
+- (Deque *)mergeSingleEdits {
+  TextAction *singleEdit;
+  TextAction *currentMergedEdit;
+  Deque *mergedEdits = [[Deque alloc] init];
+
+  while ((singleEdit = [self.currentEdit popQueue])) {
+    if ([mergedEdits empty] || currentMergedEdit.editType != singleEdit.editType) {
+      // This is the first action or the actions are different.
+      [mergedEdits push:singleEdit];
+      currentMergedEdit = singleEdit;
+    } else {
+      // The actions are of the same type. Merge them.
+      if (singleEdit.editType == DELETE) {
+        currentMergedEdit.range = NSMakeRange(singleEdit.range.location,
+                                              currentMergedEdit.range.length + singleEdit.range.length);
+        currentMergedEdit.text = (currentMergedEdit.text) ?
+            [singleEdit.text stringByAppendingString:currentMergedEdit.text] : singleEdit.text;
+      } else if (singleEdit.editType == INSERT) {
+        currentMergedEdit.text = (currentMergedEdit.text) ?
+            [currentMergedEdit.text stringByAppendingString:singleEdit.text] : singleEdit.text;
+      }
+    }
+  }
+  
+  return mergedEdits;
+}
+
+- (Deque *)resolveMergedEdits:(Deque *)mergedEdits {
+  Deque *finalEdits = [[Deque alloc] init];
+  
+  TextAction *lastAction = [mergedEdits back];
   int smallestIndex, ogCursorIndex;
   smallestIndex = ogCursorIndex = lastAction.range.location;
   NSLog(@"smallest index is %d", smallestIndex);
   
-  TextAction *curAction = [mergedActions popQueue];
-  [finalActions push:curAction];
+  TextAction *curAction = [mergedEdits popQueue];
+  [finalEdits push:curAction];
   
-  while ((curAction = [mergedActions popQueue])) {
-    TextAction* lastAction = [finalActions front];
+  while ((curAction = [mergedEdits popQueue])) {
+    TextAction* lastAction = [finalEdits front];
+    
     if (curAction.editType == DELETE) {
       if (curAction.range.location < smallestIndex) {
         int netDeletionLength = ogCursorIndex - curAction.range.location;
         curAction.range = NSMakeRange(curAction.range.location, netDeletionLength);
         
-        TextAction* ogDeleteAction = [finalActions back];
+        TextAction* ogDeleteAction = [finalEdits back];
         if (ogDeleteAction.editType == DELETE && ogDeleteAction != curAction) {
           NSLog(@"Smallest index is %d and curAction location is %d", smallestIndex, curAction.range.location);
           curAction.text =
-              [NSString stringWithFormat:@"%@%@",
-                  [curAction.text substringToIndex:(smallestIndex - curAction.range.location)],
-                  ogDeleteAction.text];
+          [NSString stringWithFormat:@"%@%@",
+           [curAction.text substringToIndex:(smallestIndex - curAction.range.location)],
+           ogDeleteAction.text];
           
           curAction.range = NSMakeRange(curAction.range.location, curAction.text.length);
         } else {
           curAction.text = [curAction.text substringToIndex:ogCursorIndex - curAction.range.location];
         }
         
-        [finalActions clear];
-        [finalActions push:curAction];
+        [finalEdits clear];
+        [finalEdits push:curAction];
         smallestIndex = curAction.range.location;
       } else {
         lastAction.text =
-            [lastAction.text substringToIndex:(lastAction.text.length - curAction.range.length)];
+        [lastAction.text substringToIndex:(lastAction.text.length - curAction.range.length)];
         
         if (!lastAction.text.length) {
           // We've clobbered the entire insertion directly before this removal.
-          [finalActions popStack];
+          [finalEdits popStack];
         }
       }
     } else if (curAction.editType == INSERT) {
       if (!lastAction || lastAction.editType == DELETE) {
-        [finalActions push:curAction];
+        [finalEdits push:curAction];
         if(lastAction && [lastAction.text isEqualToString:curAction.text]) {
-          [finalActions clear];
+          [finalEdits popStack];
         }
       } else {
         lastAction.text = [lastAction.text stringByAppendingString:curAction.text];
@@ -241,33 +261,31 @@ typedef enum {
     }
   }
   
-  // Debug print.
-  [self printQueue:finalActions];
-  
-  // Put the actions in the undo stack.
-  while ((curAction = [finalActions popQueue])) {
-    [self.undoStack push:curAction];
-  }
+  return finalEdits;
 }
 
 #pragma mark -
-#pragma mark Undo
+#pragma mark Undo and Redo
 
 - (void)undo:(UITextView *)textView {
+  [self resetTimer];
+  [self mergeCurrentEdit];
+
   TextAction *lastAction = [self.undoStack popStack];
-  
-  if (lastAction) {
-    NSLog(@"Undoing last action, location: %d, length: %d, text: [%@]",
-          lastAction.range.location,
-          lastAction.range.length,
-          lastAction.text);
-    if (lastAction.range.length > 0) {
-      [self undoRemove:lastAction textView:textView];
-    } else {
-      [self undoAdd:lastAction textView:textView];
-    }
-    [self.redoStack push:lastAction];
+  if (!lastAction) {
+    return;
   }
+  
+  NSLog(@"Undoing last action, location: %d, length: %d, text: [%@]",
+        lastAction.range.location,
+        lastAction.range.length,
+        lastAction.text);
+  if (lastAction.range.length > 0) {
+    [self undoRemove:lastAction textView:textView];
+  } else {
+    [self undoAdd:lastAction textView:textView];
+  }
+  [self.redoStack push:lastAction];
 }
 
 - (void)undoAdd:(TextAction *)addAction textView:(UITextView *)textView {
@@ -284,7 +302,49 @@ typedef enum {
 }
 
 - (void)redo:(UITextView *)textView {
-  return;
+  [self resetTimer];
+  [self mergeCurrentEdit];
+
+  TextAction *undidAction = [self.redoStack popStack];
+  if (!undidAction) {
+    return;
+  }
+  
+  NSLog(@"Redoing action, location: %d, length: %d, text: [%@]",
+        undidAction.range.location,
+        undidAction.range.length,
+        undidAction.text);
+  if (undidAction.range.length > 0) {
+    [self redoRemove:undidAction textView:textView];
+  } else {
+    [self redoAdd:undidAction textView:textView];
+  }
+  [self.undoStack push:undidAction];
+}
+
+- (void)redoAdd:(TextAction *)textAction textView:(UITextView *)textView {
+  textView.text = [NSString stringWithFormat:@"%@%@%@",
+                   [textView.text substringToIndex:textAction.range.location],
+                   textAction.text,
+                   [textView.text substringFromIndex:textAction.range.location]];
+}
+
+- (void)redoRemove:(TextAction *)textAction textView:(UITextView *)textView {
+  textView.text = [NSString stringWithFormat:@"%@%@",
+                   [textView.text substringToIndex:textAction.range.location],
+                   [textView.text substringFromIndex:(textAction.range.location +
+                                                      textAction.range.length)]];
+}
+
+- (void)resetTimer {
+  if (self.timer && self.timer.isValid) {
+    [self.timer invalidate];
+  }
+  self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0
+                                                target:self
+                                              selector:@selector(mergeCurrentEdit)
+                                              userInfo:nil
+                                               repeats:NO];
 }
 
 #pragma mark -
