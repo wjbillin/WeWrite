@@ -148,6 +148,9 @@ typedef enum {
 
 - (void)textViewDidChangeSelection:(UITextView *)textView {
   // User has moved their cursor. Merge any pending edits.
+  if (self.timer && self.timer.isValid) {
+    [self.timer invalidate];
+  }
   [self mergeCurrentEdit];
 }
 
@@ -177,30 +180,14 @@ typedef enum {
   }
   
   // Debug print.
-  Deque *mergedActionsTemp = [[Deque alloc] init];
-  while ((mergedAction = [mergedActions popQueue])) {
-    NSLog(@"Merged action entry: location: %d, length: %d, text: [%@]", mergedAction.range.location,
-          mergedAction.range.length, mergedAction.text);
-    [mergedActionsTemp push:mergedAction];
-  }
-  mergedActions = mergedActionsTemp;
+  [self printQueue:mergedActions];
   
-  Deque *finalActions = [[Deque alloc] init];
-  
-  // Now, merge individual add/delete sequences as much as possible.
   if ([mergedActions empty]) {
     return;
   }
-  if ([mergedActions size] == 1) {
-    // Send off command.
-    TextAction *action = [mergedActions front];
-    NSLog(@"Single action: location: %d, length: %d, text: %@",
-          action.range.location,
-          action.range.length,
-          action.text);
-    [finalActions push:[mergedActions popQueue]];
-    return;
-  }
+  
+  // Now, merge individual add/delete sequences as much as possible.
+  Deque *finalActions = [[Deque alloc] init];
   
   TextAction* lastAction = [mergedActions back];
   int smallestIndex, ogCursorIndex;
@@ -238,14 +225,14 @@ typedef enum {
             [lastAction.text substringToIndex:(lastAction.text.length - curAction.range.length)];
         
         if (!lastAction.text.length) {
-          // We've wiped out EVERYTHING.
+          // We've clobbered the entire insertion directly before this removal.
           [finalActions popStack];
         }
       }
     } else if (curAction.editType == INSERT) {
       if (!lastAction || lastAction.editType == DELETE) {
         [finalActions push:curAction];
-        if([lastAction.text isEqualToString:curAction.text]) {
+        if(lastAction && [lastAction.text isEqualToString:curAction.text]) {
           [finalActions clear];
         }
       } else {
@@ -255,14 +242,12 @@ typedef enum {
   }
   
   // Debug print.
-  while ((mergedAction = [finalActions popQueue])) {
-    NSLog(@"Final action entry: location: %d, length: %d, text: [%@]", mergedAction.range.location,
-          mergedAction.range.length, mergedAction.text);
-    
-    // Eventually break this out.
-    [self.undoStack push:mergedAction];
-  }
+  [self printQueue:finalActions];
   
+  // Put the actions in the undo stack.
+  while ((curAction = [finalActions popQueue])) {
+    [self.undoStack push:curAction];
+  }
 }
 
 #pragma mark -
@@ -277,29 +262,47 @@ typedef enum {
           lastAction.range.length,
           lastAction.text);
     if (lastAction.range.length > 0) {
-      [self undoRemove:lastAction text:textView.text];
+      [self undoRemove:lastAction textView:textView];
     } else {
-      [self undoAdd:lastAction text:textView.text];
+      [self undoAdd:lastAction textView:textView];
     }
     [self.redoStack push:lastAction];
   }
 }
 
-- (void)undoAdd:(TextAction *)addAction text:(NSString *)text {
-  text = [NSString stringWithFormat:@"%@%@",
-          [text substringToIndex:addAction.range.location],
-          [text substringFromIndex:(addAction.range.location + addAction.text.length)]];
+- (void)undoAdd:(TextAction *)addAction textView:(UITextView *)textView {
+  textView.text = [NSString stringWithFormat:@"%@%@",
+                   [textView.text substringToIndex:addAction.range.location],
+                   [textView.text substringFromIndex:(addAction.range.location + addAction.text.length)]];
 }
 
-- (void)undoRemove:(TextAction *)removeAction text:(NSString *)text {
-  text = [NSString stringWithFormat:@"%@%@%@",
-          [text substringToIndex:removeAction.range.location],
-          removeAction.text,
-          [text substringFromIndex:removeAction.range.location]];
+- (void)undoRemove:(TextAction *)removeAction textView:(UITextView *)textView {
+  textView.text = [NSString stringWithFormat:@"%@%@%@",
+                   [textView.text substringToIndex:removeAction.range.location],
+                   removeAction.text,
+                   [textView.text substringFromIndex:removeAction.range.location]];
 }
 
 - (void)redo:(UITextView *)textView {
   return;
+}
+
+#pragma mark -
+#pragma mark Utility
+
+- (void)printQueue:(Deque *)deque {
+  TextAction *action;
+  int count = 0;
+  int size = [deque size];
+  
+  while (count++ < size) {
+    action = [deque popQueue];
+    NSLog(@"Queue entry: location: %d, length: %d, text: [%@]",
+          action.range.location,
+          action.range.length,
+          action.text);
+    [deque push:action];
+  }
 }
 
 @end
