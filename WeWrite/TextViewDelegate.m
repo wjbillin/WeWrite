@@ -121,7 +121,7 @@ typedef enum {
   NSUInteger currentCursor = textView.selectedRange.location;
   
   if (lastAction && lastAction.range.length > 0 && currentCursor == (lastAction.range.location - 1)) {
-    // This is an iOS bug - or at least VERY bad behavior. Take the sentence 'I like to work.'. If
+    // This is an iOS 6 bug - or at least VERY bad behavior. Take the sentence 'I like to work.'. If
     // you select 'to' and press backspace, iOS decides to delete 'to' as well as the space preceding
     // 'to', WITHOUT giving us any indication that it has done this. Making it even worse, sometimes
     // it does NOT delete the space before 'to' (if you select 'to', click and hold on left blue selection
@@ -151,6 +151,7 @@ typedef enum {
 }
 
 - (void)mergeCurrentEdit {
+  // First, merge individual edits (usually insert/remove a single char) into group edits.
   Deque *mergedEdits = [self mergeSingleEdits];
   
   // Debug print.
@@ -160,7 +161,7 @@ typedef enum {
     return;
   }
   
-  // Now, merge individual add/delete sequences as much as possible.
+  // Now, merge group add/delete sequences as much as possible.
   Deque *finalEdits = [self resolveMergedEdits:mergedEdits];
   
   // Debug print.
@@ -173,11 +174,11 @@ typedef enum {
   }
 }
 
-// Merge a series of single edits (i.e. (INSERT, 6, 'h'), (INSERT, 7, 'i')) into a series of merged edits
-// (i.e. (INSERT, 6, 'hi')). However, this function makes no effort to resolve these 'merged edits'
-// (i.e. (INSERT, 4, 'here'), (REMOVE, 2, 're'), (INSERT, 1, 'm') is NOT resolved to the single edit
-// (INSERT, 3, 'hem'), although it is semantically correct to do so. For that functionality, please see
-// resolveMergedEdits.
+// Merge a series of single edits (i.e. (INSERT, {0,0}, 'h'), (INSERT, {1,0}, 'i')) into a series of merged
+// edits (i.e. (INSERT, {0,0}, 'hi')). However, this function makes no effort to resolve these 'merged
+// edits' (i.e. (INSERT, {0,0}, 'here'), (DELETE, {2,2}, 're'), (INSERT, {2,0}, 'm') is NOT resolved to the
+// single edit (INSERT, {0,0}, 'hem'), although it is semantically correct to do so. For that functionality,
+// please see resolveMergedEdits.
 - (Deque *)mergeSingleEdits {
   TextAction *singleEdit;
   TextAction *currentMergedEdit;
@@ -205,6 +206,12 @@ typedef enum {
   return mergedEdits;
 }
 
+// Resolve the merged edits (add/removal group edits) into the minimum number of actions that correctly
+// represent the edits made.
+//
+// Let's look at a high-level example: if mergedEdits is {(INSERT, {0,0}, 'hello'), (DELETE, {2,3}, 'llo'),
+// (INSERT, {2, 0}, ' likes to eat')}, then this function will resolve mergedEdits into a deque with a
+// single action - {(INSERT, {0,0}, 'he likes to eat')}.
 - (Deque *)resolveMergedEdits:(Deque *)mergedEdits {
   Deque *finalEdits = [[Deque alloc] init];
   
@@ -340,7 +347,7 @@ typedef enum {
   if (self.timer && self.timer.isValid) {
     [self.timer invalidate];
   }
-  self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0
+  self.timer = [NSTimer scheduledTimerWithTimeInterval:0.5
                                                 target:self
                                               selector:@selector(mergeCurrentEdit)
                                               userInfo:nil
