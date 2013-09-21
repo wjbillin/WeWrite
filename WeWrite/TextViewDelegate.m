@@ -8,7 +8,7 @@
 
 #import "Deque.h"
 #import "TextViewDelegate.h"
-#import "TextAction.h"
+#import "Actions.h"
 #import "TextCollabrifyClient.h"
 
 BOOL selectionChangeFromInput = NO;
@@ -32,11 +32,6 @@ int lastSelectedLocation = 0;
   return self;
 }
 
-
-- (id)initWithCollabClient: (TextCollabrifyClient *) collab {
-  _textCollabClient = collab;
-  return [self init];
-}
 - (BOOL)textView:(UITextView *)textView
     shouldChangeTextInRange:(NSRange)range
             replacementText:(NSString *)text {
@@ -148,7 +143,7 @@ int lastSelectedLocation = 0;
   [self printQueue:finalEdits];
   
   // Deque to pass to collab client
-  Deque *editsForCollab = [[Deque alloc]init];
+  Deque *editsForCollab = [[Deque alloc] init];
   
   // Put the actions in the undo stack.
   TextAction *curAction;
@@ -158,7 +153,7 @@ int lastSelectedLocation = 0;
   }
   
   // notify collab client of changes
-  [self.textCollabClient textDidChange:editsForCollab];
+  [[TextCollabrifyClient sharedClient] sendTextActions:editsForCollab];
 }
 
 // Merge a series of single edits (i.e. (INSERT, {0,0}, 'h'), (INSERT, {1,0}, 'i')) into a series of merged

@@ -9,20 +9,18 @@
 #import <Collabrify/Collabrify.h>
 #import <Foundation/Foundation.h>
 
-@class TextViewController;
-@class SplashViewController;
 @class Deque;
 
 @interface TextCollabrifyClient : NSObject
 
 @property (nonatomic, retain) CollabrifyClient* client;
-@property (nonatomic, retain) TextViewController *textViewController;
-@property (nonatomic, retain) SplashViewController *splashViewController;
 @property (nonatomic, retain) NSMutableDictionary *unconfirmedActions;
 @property (nonatomic, retain) Deque *incomingActions;
 
-- (id)initWithViewController:(TextViewController *)text;
++ (id)sharedClient;
+
+- (id)init;
 - (void)findSession;
-- (void) textDidChange:(Deque *)finalEdits;
+- (void)sendTextActions:(Deque *)finalEdits;
 
 @end

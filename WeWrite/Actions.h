@@ -24,6 +24,14 @@ typedef enum {
 - (id)init:(TextAction *)action;
 - (id)init:(NSRange)range text:(NSString *)text;
 - (id)init:(NSInteger)user text:(NSString *)text editType:(EditType)type;
+
 - (EditType)type:(NSRange)range;
+
+@end
+
+@interface CursorAction : NSObject
+
+@property (nonatomic, assign) NSInteger user;
+@property (nonatomic, assign) NSInteger position;
 
 @end

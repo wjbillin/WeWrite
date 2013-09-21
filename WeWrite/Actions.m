@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 William Joshua Billingham. All rights reserved.
 //
 
-#import "TextAction.h"
+#import "Actions.h"
 
 @implementation TextAction
 

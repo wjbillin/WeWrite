@@ -55,7 +55,7 @@
                                                name:@"SESSION_JOINED"
                                              object:nil];
   
-  [self.textViewController.collabrifyClient findSession];
+  [[TextCollabrifyClient sharedClient] findSession];
 }
 
 - (void)joinedSession {

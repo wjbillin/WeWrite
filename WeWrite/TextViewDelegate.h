@@ -20,11 +20,10 @@
 @property (nonatomic, retain) Deque *undoStack;
 @property (nonatomic, retain) Deque *currentEdit;
 @property (nonatomic, retain) NSTimer *timer;
-@property (nonatomic, retain) TextCollabrifyClient *textCollabClient;
 
+- (id)init;
 - (void)mergeCurrentEdit;
 - (void)undo:(UITextView *)textView;
 - (void)redo:(UITextView *)textView;
-- (id)initWithCollabClient: (TextCollabrifyClient *) collab;
 
 @end
