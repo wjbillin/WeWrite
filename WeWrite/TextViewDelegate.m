@@ -9,6 +9,7 @@
 #import "Deque.h"
 #import "TextViewDelegate.h"
 #import "TextAction.h"
+#import "TextCollabrifyClient.h"
 
 BOOL selectionChangeFromInput = NO;
 int lastSelectedLocation = 0;
@@ -31,6 +32,11 @@ int lastSelectedLocation = 0;
   return self;
 }
 
+
+- (id)initWithCollabClient: (TextCollabrifyClient *) collab {
+  _textCollabClient = collab;
+  return [self init];
+}
 - (BOOL)textView:(UITextView *)textView
     shouldChangeTextInRange:(NSRange)range
             replacementText:(NSString *)text {
@@ -141,11 +147,18 @@ int lastSelectedLocation = 0;
   // Debug print.
   [self printQueue:finalEdits];
   
+  // Deque to pass to collab client
+  Deque *editsForCollab = [[Deque alloc]init];
+  
   // Put the actions in the undo stack.
   TextAction *curAction;
   while ((curAction = [finalEdits popQueue])) {
     [self.undoStack push:curAction];
+    [editsForCollab push:curAction];
   }
+  
+  // notify collab client of changes
+  [self.textCollabClient textDidChange:editsForCollab];
 }
 
 // Merge a series of single edits (i.e. (INSERT, {0,0}, 'h'), (INSERT, {1,0}, 'i')) into a series of merged
@@ -165,7 +178,7 @@ int lastSelectedLocation = 0;
       currentMergedEdit = singleEdit;
     } else {
       // The actions are of the same type. Merge them.
-      if (singleEdit.editType == DELETE) {
+      if (singleEdit.editType == REMOVE) {
         currentMergedEdit.range = NSMakeRange(singleEdit.range.location,
                                               currentMergedEdit.range.length + singleEdit.range.length);
         currentMergedEdit.text = (currentMergedEdit.text) ?
@@ -200,13 +213,13 @@ int lastSelectedLocation = 0;
   while ((curAction = [mergedEdits popQueue])) {
     TextAction* lastAction = [finalEdits front];
     
-    if (curAction.editType == DELETE) {
+    if (curAction.editType == REMOVE) {
       if (curAction.range.location < smallestIndex) {
         int netDeletionLength = ogCursorIndex - curAction.range.location;
         curAction.range = NSMakeRange(curAction.range.location, netDeletionLength);
         
         TextAction* ogDeleteAction = [finalEdits back];
-        if (ogDeleteAction.editType == DELETE && ogDeleteAction != curAction) {
+        if (ogDeleteAction.editType == REMOVE && ogDeleteAction != curAction) {
           NSLog(@"Smallest index is %d and curAction location is %d", smallestIndex, curAction.range.location);
           curAction.text =
           [NSString stringWithFormat:@"%@%@",
@@ -231,7 +244,7 @@ int lastSelectedLocation = 0;
         }
       }
     } else if (curAction.editType == INSERT) {
-      if (!lastAction || lastAction.editType == DELETE) {
+      if (!lastAction || lastAction.editType == REMOVE) {
         [finalEdits push:curAction];
         if(lastAction && [lastAction.text isEqualToString:curAction.text]) {
           [finalEdits popStack];
@@ -241,6 +254,7 @@ int lastSelectedLocation = 0;
       }
     }
   }
+
   
   return finalEdits;
 }

@@ -12,6 +12,7 @@
 #import "CollabrifySession.h"
 #import "froto/text.pb.h"
 #import "TextAction.h"
+#import "Deque.h"
 
 @interface TextCollabrifyClient () <CollabrifyClientDelegate, CollabrifyClientDataSource>
 
@@ -93,6 +94,9 @@ NSString *sessionName = @"SOMESECRETKEY";
   }];
 }
 
+- (void) textDidChange:(Deque *)finalEdits {
+  NSLog(@"The text did change. %d edits.", finalEdits.size);
+}
 
 -(void) client:(CollabrifyClient *)client receivedEventWithOrderID:(int64_t)orderID submissionRegistrationID:(int32_t)submissionRegistrationID eventType:(NSString *)eventType data:(NSData *)data {
   
@@ -101,6 +105,8 @@ NSString *sessionName = @"SOMESECRETKEY";
     CursorUpdate cu;
     cu.MessageLite::ParseFromArray((const void*) CFBridgingRetain(data), data.length);
     
+    
+    
     NSLog(@"user: %d, position: %d", cu.user(), cu.position());
     
   } else if ([eventType isEqualToString:@"TextChange"]) {
@@ -108,15 +114,16 @@ NSString *sessionName = @"SOMESECRETKEY";
     TextChange tc;
     tc.MessageLite::ParseFromArray((const void*) CFBridgingRetain(data), data.length);
     
-    TextAction *action = [[TextAction alloc] init];
-    
-    [action setUser:tc.user()];
-    [action setText:[NSString stringWithUTF8String:tc.text().c_str()]];
-    [action setEditType:(tc.type() == TextChange::INSERT)? INSERT : REMOVE];
+    TextAction *action = [[TextAction alloc] init:tc.user()
+                                             text:[NSString stringWithUTF8String:tc.text().c_str()]
+                                         editType:(tc.type() == TextChange::INSERT)? INSERT : REMOVE];
     
     NSLog(@"user: %d, text: %s, type: %d", tc.user(), tc.text().c_str(), tc.type());
+    
+        
+    [self.incomingActions push:action];
+    
   }
-  
 }
 
 @end

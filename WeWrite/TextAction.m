@@ -35,6 +35,16 @@
   return self;
 }
 
+- (id)init:(NSInteger)user text:(NSString *)text editType:(EditType)type {
+  if (self = [super init]) {
+    _range = NSMakeRange(0, text.length); // location defined later
+    _user = user;
+    _text = text;
+    _editType = type;
+  }
+  return self;
+}
+
 - (EditType)type:(NSRange)range{
   return (range.length == 0) ? INSERT : REMOVE;
 }

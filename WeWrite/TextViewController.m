@@ -22,8 +22,8 @@
     
   if (self = [super init]) {
     _textView = [[UITextView alloc] init];
-    _delegate = [[TextViewDelegate alloc] init];
     _collabrifyClient = [[TextCollabrifyClient alloc] initWithViewController:self];
+    _delegate = [[TextViewDelegate alloc] initWithCollabClient:_collabrifyClient];
     
     _undoButton = [[UIButton alloc] init];
     _redoButton = [[UIButton alloc] init];
