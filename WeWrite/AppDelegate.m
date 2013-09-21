@@ -7,13 +7,15 @@
 //
 
 #import "AppDelegate.h"
-#import "BaseViewController.h"
+#import "SplashViewController.h"
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  self.window.rootViewController = [[BaseViewController alloc] init];
+  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+  self.window.rootViewController = [[SplashViewController alloc] init];
+  [self.window makeKeyAndVisible];
   return YES;
 }
 							

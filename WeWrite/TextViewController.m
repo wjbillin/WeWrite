@@ -1,27 +1,29 @@
 //
-//  BaseViewController.m
+//  TextViewController.m
 //  WeWrite
 //
 //  Created by William Joshua Billingham on 9/11/13.
 //  Copyright (c) 2013 William Joshua Billingham. All rights reserved.
 //
 
-#import "BaseViewController.h"
+#import "TextCollabrifyClient.h"
+#import "TextViewController.h"
 #import "TextViewDelegate.h"
 
 #define TOP_TOOLBAR_HEIGHT 50
 
-@interface BaseViewController ()
+@interface TextViewController ()
 
 @end
 
-@implementation BaseViewController
+@implementation TextViewController
 
 - (id)init {
     
   if (self = [super init]) {
     _textView = [[UITextView alloc] init];
     _delegate = [[TextViewDelegate alloc] init];
+    _collabrifyClient = [[TextCollabrifyClient alloc] initWithViewController:self];
     
     _undoButton = [[UIButton alloc] init];
     _redoButton = [[UIButton alloc] init];
@@ -31,8 +33,8 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-  [self setUpTextView];
   [self setUpButtons];
+  [self setUpTextView];
 }
 
 - (void)setUpButtons {
@@ -69,6 +71,10 @@
 
 - (void)redo {
   [self.delegate redo:self.textView];
+}
+
+- (void)joinedSession {
+  NSLog(@"Joined session! Yay!");
 }
 
 @end

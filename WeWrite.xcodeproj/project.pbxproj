@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B3325B6017ED56BB0038D870 /* TextCollabrifyClient.m in Sources */ = {isa = PBXBuildFile; fileRef = B3325B5F17ED56BB0038D870 /* TextCollabrifyClient.m */; };
+		B3325B6317ED725F0038D870 /* SplashViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B3325B6217ED725F0038D870 /* SplashViewController.m */; };
 		B3709DD817E146C300FAEE34 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3709DD717E146C300FAEE34 /* UIKit.framework */; };
 		B3709DDA17E146C300FAEE34 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3709DD917E146C300FAEE34 /* Foundation.framework */; };
 		B3709DDC17E146C300FAEE34 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3709DDB17E146C300FAEE34 /* CoreGraphics.framework */; };
@@ -16,9 +18,7 @@
 		B3709DEA17E146C300FAEE34 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = B3709DE917E146C300FAEE34 /* Default.png */; };
 		B3709DEC17E146C300FAEE34 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B3709DEB17E146C300FAEE34 /* Default@2x.png */; };
 		B3709DEE17E146C300FAEE34 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B3709DED17E146C300FAEE34 /* Default-568h@2x.png */; };
-		B3709DF117E146C300FAEE34 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B3709DEF17E146C300FAEE34 /* MainStoryboard_iPhone.storyboard */; };
-		B3709DF417E146C300FAEE34 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B3709DF217E146C300FAEE34 /* MainStoryboard_iPad.storyboard */; };
-		B3709DF717E146C300FAEE34 /* BaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709DF617E146C300FAEE34 /* BaseViewController.m */; };
+		B3709DF717E146C300FAEE34 /* TextViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709DF617E146C300FAEE34 /* TextViewController.m */; };
 		B3709DFF17E146C300FAEE34 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3709DFE17E146C300FAEE34 /* SenTestingKit.framework */; };
 		B3709E0017E146C300FAEE34 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3709DD717E146C300FAEE34 /* UIKit.framework */; };
 		B3709E0117E146C300FAEE34 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3709DD917E146C300FAEE34 /* Foundation.framework */; };
@@ -111,6 +111,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B3325B5E17ED56BB0038D870 /* TextCollabrifyClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextCollabrifyClient.h; sourceTree = "<group>"; };
+		B3325B5F17ED56BB0038D870 /* TextCollabrifyClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextCollabrifyClient.m; sourceTree = "<group>"; };
+		B3325B6117ED725E0038D870 /* SplashViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SplashViewController.h; sourceTree = "<group>"; };
+		B3325B6217ED725F0038D870 /* SplashViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SplashViewController.m; sourceTree = "<group>"; };
 		B3709DD417E146C300FAEE34 /* WeWrite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeWrite.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3709DD717E146C300FAEE34 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		B3709DD917E146C300FAEE34 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -124,10 +128,8 @@
 		B3709DE917E146C300FAEE34 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		B3709DEB17E146C300FAEE34 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		B3709DED17E146C300FAEE34 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		B3709DF017E146C300FAEE34 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
-		B3709DF317E146C300FAEE34 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
-		B3709DF517E146C300FAEE34 /* BaseViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BaseViewController.h; sourceTree = "<group>"; };
-		B3709DF617E146C300FAEE34 /* BaseViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BaseViewController.m; sourceTree = "<group>"; };
+		B3709DF517E146C300FAEE34 /* TextViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextViewController.h; sourceTree = "<group>"; };
+		B3709DF617E146C300FAEE34 /* TextViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextViewController.m; sourceTree = "<group>"; };
 		B3709DFD17E146C300FAEE34 /* WeWriteTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WeWriteTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3709DFE17E146C300FAEE34 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		B3709E0617E146C300FAEE34 /* WeWriteTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WeWriteTests-Info.plist"; sourceTree = "<group>"; };
@@ -135,7 +137,7 @@
 		B3709E0A17E146C300FAEE34 /* WeWriteTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WeWriteTests.h; sourceTree = "<group>"; };
 		B3709E0B17E146C300FAEE34 /* WeWriteTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WeWriteTests.m; sourceTree = "<group>"; };
 		B3709E1517E16DB000FAEE34 /* Collabrify.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Collabrify.bundle; sourceTree = "<group>"; };
-		B3709E1717E16DC400FAEE34 /* Collabrify.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Collabrify.framework; sourceTree = "<group>"; };
+		B3709E1717E16DC400FAEE34 /* Collabrify.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Collabrify.framework; path = ../Collabrify.framework; sourceTree = "<group>"; };
 		B3709E1A17E16E4C00FAEE34 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = config.h; path = ../config.h; sourceTree = "<group>"; };
 		B3709E1E17E16ED300FAEE34 /* descriptor.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = descriptor.cc; sourceTree = "<group>"; };
 		B3709E1F17E16ED300FAEE34 /* descriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = descriptor.h; sourceTree = "<group>"; };
@@ -281,7 +283,6 @@
 		B3709DD617E146C300FAEE34 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				B3709E1717E16DC400FAEE34 /* Collabrify.framework */,
 				B3709DD717E146C300FAEE34 /* UIKit.framework */,
 				B3709DD917E146C300FAEE34 /* Foundation.framework */,
 				B3709DDB17E146C300FAEE34 /* CoreGraphics.framework */,
@@ -293,16 +294,19 @@
 		B3709DDD17E146C300FAEE34 /* WeWrite */ = {
 			isa = PBXGroup;
 			children = (
+				B3709E1717E16DC400FAEE34 /* Collabrify.framework */,
 				B3709E1A17E16E4C00FAEE34 /* config.h */,
 				B3709E1B17E16ED300FAEE34 /* Google Protocol Buffers */,
 				B3709DE617E146C300FAEE34 /* AppDelegate.h */,
 				B3709DE717E146C300FAEE34 /* AppDelegate.m */,
-				B3709DEF17E146C300FAEE34 /* MainStoryboard_iPhone.storyboard */,
-				B3709DF217E146C300FAEE34 /* MainStoryboard_iPad.storyboard */,
-				B3709DF517E146C300FAEE34 /* BaseViewController.h */,
-				B3709DF617E146C300FAEE34 /* BaseViewController.m */,
 				B3709EBF17E2749800FAEE34 /* Deque.h */,
 				B3709EC017E2749800FAEE34 /* Deque.m */,
+				B3325B6117ED725E0038D870 /* SplashViewController.h */,
+				B3325B6217ED725F0038D870 /* SplashViewController.m */,
+				B3325B5E17ED56BB0038D870 /* TextCollabrifyClient.h */,
+				B3325B5F17ED56BB0038D870 /* TextCollabrifyClient.m */,
+				B3709DF517E146C300FAEE34 /* TextViewController.h */,
+				B3709DF617E146C300FAEE34 /* TextViewController.m */,
 				B3709EBB17E17C7B00FAEE34 /* TextViewDelegate.h */,
 				B3709EBC17E17C7C00FAEE34 /* TextViewDelegate.m */,
 				B3709DDE17E146C300FAEE34 /* Supporting Files */,
@@ -548,8 +552,6 @@
 				B3709DEA17E146C300FAEE34 /* Default.png in Resources */,
 				B3709DEC17E146C300FAEE34 /* Default@2x.png in Resources */,
 				B3709DEE17E146C300FAEE34 /* Default-568h@2x.png in Resources */,
-				B3709DF117E146C300FAEE34 /* MainStoryboard_iPhone.storyboard in Resources */,
-				B3709DF417E146C300FAEE34 /* MainStoryboard_iPad.storyboard in Resources */,
 				B3709E1617E16DB000FAEE34 /* Collabrify.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -587,7 +589,7 @@
 			files = (
 				B3709DE417E146C300FAEE34 /* main.m in Sources */,
 				B3709DE817E146C300FAEE34 /* AppDelegate.m in Sources */,
-				B3709DF717E146C300FAEE34 /* BaseViewController.m in Sources */,
+				B3709DF717E146C300FAEE34 /* TextViewController.m in Sources */,
 				B3709E7317E16ED400FAEE34 /* descriptor.cc in Sources */,
 				B3709E7517E16ED400FAEE34 /* descriptor.pb.cc in Sources */,
 				B3709E7717E16ED400FAEE34 /* descriptor_database.cc in Sources */,
@@ -595,6 +597,7 @@
 				B3709E7B17E16ED400FAEE34 /* extension_set.cc in Sources */,
 				B3709E7D17E16ED400FAEE34 /* extension_set_heavy.cc in Sources */,
 				B3709E7F17E16ED400FAEE34 /* generated_message_reflection.cc in Sources */,
+				B3325B6017ED56BB0038D870 /* TextCollabrifyClient.m in Sources */,
 				B3709E8117E16ED400FAEE34 /* generated_message_util.cc in Sources */,
 				B3709E8317E16ED400FAEE34 /* coded_stream.cc in Sources */,
 				B3709E8517E16ED400FAEE34 /* printer.cc in Sources */,
@@ -619,6 +622,7 @@
 				B3709EAB17E16ED400FAEE34 /* googletest.cc in Sources */,
 				B3709EAD17E16ED400FAEE34 /* text_format.cc in Sources */,
 				B3709EAF17E16ED400FAEE34 /* unknown_field_set.cc in Sources */,
+				B3325B6317ED725F0038D870 /* SplashViewController.m in Sources */,
 				B3709EB117E16ED400FAEE34 /* wire_format.cc in Sources */,
 				B3709EB317E16ED400FAEE34 /* wire_format_lite.cc in Sources */,
 				B3709EBD17E17C7C00FAEE34 /* TextViewDelegate.m in Sources */,
@@ -686,22 +690,6 @@
 				B3709DE117E146C300FAEE34 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		B3709DEF17E146C300FAEE34 /* MainStoryboard_iPhone.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				B3709DF017E146C300FAEE34 /* en */,
-			);
-			name = MainStoryboard_iPhone.storyboard;
-			sourceTree = "<group>";
-		};
-		B3709DF217E146C300FAEE34 /* MainStoryboard_iPad.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				B3709DF317E146C300FAEE34 /* en */,
-			);
-			name = MainStoryboard_iPad.storyboard;
 			sourceTree = "<group>";
 		};
 		B3709E0717E146C300FAEE34 /* InfoPlist.strings */ = {
@@ -784,6 +772,7 @@
 				GCC_PREFIX_HEADER = "WeWrite/WeWrite-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/Google Protocol Buffers\"",
+					"\"$(SRCROOT)/Collabrify.framework/Headers\"",
 				);
 				INFOPLIST_FILE = "WeWrite/WeWrite-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -802,6 +791,7 @@
 				GCC_PREFIX_HEADER = "WeWrite/WeWrite-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/Google Protocol Buffers\"",
+					"\"$(SRCROOT)/Collabrify.framework/Headers\"",
 				);
 				INFOPLIST_FILE = "WeWrite/WeWrite-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -862,6 +852,7 @@
 				B3709E1117E146C300FAEE34 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B3709E1217E146C300FAEE34 /* Build configuration list for PBXNativeTarget "WeWriteTests" */ = {
 			isa = XCConfigurationList;
@@ -870,6 +861,7 @@
 				B3709E1417E146C300FAEE34 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
