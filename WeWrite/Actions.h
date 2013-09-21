@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "froto/text.pb.h"
 
 typedef enum {
   INSERT,
@@ -36,7 +35,7 @@ typedef enum {
 @property (nonatomic, retain) NSString* text;
 @property (nonatomic, assign) EditType editType;
 
-- (id)initWithServerUpdate:(TextUpdate *)textUpdate;
+- (id)initWithServerUpdate:(NSInteger)user text:(NSString *)text editType:(EditType)editType;
 
 @end
 
@@ -47,7 +46,6 @@ typedef enum {
 @property (nonatomic, assign) NSInteger position;
 
 - (id)init;
-- (id)initWithServerUpdate:(CursorUpdate *)cursorUpdate;
 - (id)initWithPosition:(NSInteger)position user:(NSInteger)user;
 
 @end

@@ -7,7 +7,6 @@
 //
 
 #import "Actions.h"
-#import "froto/text.pb.h"
 
 @implementation LocalTextAction
 
@@ -45,13 +44,11 @@
 
 @implementation ServerTextAction
 
-- (id)initWithServerUpdate:(TextUpdate *)textUpdate {
+- (id)initWithServerUpdate:(NSInteger)user text:(NSString *)text editType:(EditType)editType {
   if (self = [super init]) {
-    _user = textUpdate->user();
-    _text = [NSString stringWithCString:textUpdate->text().c_str()
-                               encoding:[NSString defaultCStringEncoding]];
-    _editType = (textUpdate->type() == TextUpdate_ChangeType::TextUpdate_ChangeType_INSERT)
-        ? INSERT : REMOVE;
+    _user = user;
+    _text = [NSString stringWithString:text];
+    _editType = editType;
   }
   
   return self;
@@ -65,15 +62,6 @@
   if (self = [super init]) {
     _user = -1;
     _position = -1;
-  }
-  
-  return self;
-}
-
-- (id)initWithServerUpdate:(CursorUpdate *)cursorUpdate {
-  if (self = [super init]) {
-    _user = cursorUpdate->user();
-    _position = cursorUpdate->position();
   }
   
   return self;

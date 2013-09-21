@@ -50,19 +50,20 @@ int lastSelectedLocation = 0;
   if (range.length > 0 && text.length == 0) {
     // This action is a delete. Find out what characters were deleted.
     NSString *deletedText = [textView.text substringWithRange:range];
-    [self.currentEdit push:[[TextAction alloc] init:range text:deletedText]];
+    [self.currentEdit push:[[LocalTextAction alloc] initWithRange:range text:deletedText]];
   } else if (range.length > 0 && text.length > 0) {
     // This action is an autocomplete/correct. Split it up into a remove and an addition.
     NSString* deletedText = [textView.text substringWithRange:range];
     
     // Push on the remove.
-    [self.currentEdit push:[[TextAction alloc] init:range text:deletedText]];
+    [self.currentEdit push:[[LocalTextAction alloc] initWithRange:range text:deletedText]];
     
     // Push on the add.
-    [self.currentEdit push:[[TextAction alloc] init:NSMakeRange(range.location, 0) text:text]];
+    [self.currentEdit push:[[LocalTextAction alloc] initWithRange:NSMakeRange(range.location, 0)
+                                                             text:text]];
   } else {
     // This action is an add.
-    [self.currentEdit push:[[TextAction alloc] init:range text:text]];
+    [self.currentEdit push:[[LocalTextAction alloc] initWithRange:range text:text]];
   }
   
   // If the timer is currently running, we want to stop it before scheduling it again.
@@ -82,7 +83,7 @@ int lastSelectedLocation = 0;
 - (void)textViewDidChange:(UITextView *)textView {
   //NSLog(@"TextViewDidChange callback, selected position: %d", textView.selectedRange.location);
   
-  TextAction *lastAction = [self.currentEdit front];
+  LocalTextAction *lastAction = [self.currentEdit front];
   NSUInteger currentCursor = textView.selectedRange.location;
   
   if (lastAction && lastAction.range.length > 0 && currentCursor == (lastAction.range.location - 1)) {
@@ -146,7 +147,7 @@ int lastSelectedLocation = 0;
   Deque *editsForCollab = [[Deque alloc] init];
   
   // Put the actions in the undo stack.
-  TextAction *curAction;
+  LocalTextAction *curAction;
   while ((curAction = [finalEdits popQueue])) {
     [self.undoStack push:curAction];
     [editsForCollab push:curAction];
@@ -162,8 +163,8 @@ int lastSelectedLocation = 0;
 // single edit (INSERT, {0,0}, 'hem'), although it is semantically correct to do so. For that functionality,
 // please see resolveMergedEdits.
 - (Deque *)mergeSingleEdits {
-  TextAction *singleEdit;
-  TextAction *currentMergedEdit;
+  LocalTextAction *singleEdit;
+  LocalTextAction *currentMergedEdit;
   Deque *mergedEdits = [[Deque alloc] init];
 
   while ((singleEdit = [self.currentEdit popQueue])) {
@@ -197,23 +198,23 @@ int lastSelectedLocation = 0;
 - (Deque *)resolveMergedEdits:(Deque *)mergedEdits {
   Deque *finalEdits = [[Deque alloc] init];
   
-  TextAction *lastAction = [mergedEdits back];
+  LocalTextAction *lastAction = [mergedEdits back];
   int smallestIndex, ogCursorIndex;
   smallestIndex = ogCursorIndex = lastAction.range.location;
   //NSLog(@"smallest index is %d", smallestIndex);
   
-  TextAction *curAction = [mergedEdits popQueue];
+  LocalTextAction *curAction = [mergedEdits popQueue];
   [finalEdits push:curAction];
   
   while ((curAction = [mergedEdits popQueue])) {
-    TextAction* lastAction = [finalEdits front];
+    LocalTextAction* lastAction = [finalEdits front];
     
     if (curAction.editType == REMOVE) {
       if (curAction.range.location < smallestIndex) {
         int netDeletionLength = ogCursorIndex - curAction.range.location;
         curAction.range = NSMakeRange(curAction.range.location, netDeletionLength);
         
-        TextAction* ogDeleteAction = [finalEdits back];
+        LocalTextAction* ogDeleteAction = [finalEdits back];
         if (ogDeleteAction.editType == REMOVE && ogDeleteAction != curAction) {
           NSLog(@"Smallest index is %d and curAction location is %d", smallestIndex, curAction.range.location);
           curAction.text =
@@ -261,7 +262,7 @@ int lastSelectedLocation = 0;
   [self.timer invalidate];
   [self mergeCurrentEdit];
 
-  TextAction *lastAction = [self.undoStack popStack];
+  LocalTextAction *lastAction = [self.undoStack popStack];
   if (!lastAction) {
     return;
   }
@@ -279,13 +280,13 @@ int lastSelectedLocation = 0;
   selectionChangeFromInput = YES;
 }
 
-- (void)undoAdd:(TextAction *)addAction textView:(UITextView *)textView {
+- (void)undoAdd:(LocalTextAction *)addAction textView:(UITextView *)textView {
   textView.text = [NSString stringWithFormat:@"%@%@",
                    [textView.text substringToIndex:addAction.range.location],
                    [textView.text substringFromIndex:(addAction.range.location + addAction.text.length)]];
 }
 
-- (void)undoRemove:(TextAction *)removeAction textView:(UITextView *)textView {
+- (void)undoRemove:(LocalTextAction *)removeAction textView:(UITextView *)textView {
   textView.text = [NSString stringWithFormat:@"%@%@%@",
                    [textView.text substringToIndex:removeAction.range.location],
                    removeAction.text,
@@ -296,7 +297,7 @@ int lastSelectedLocation = 0;
   [self.timer invalidate];
   [self mergeCurrentEdit];
 
-  TextAction *undidAction = [self.redoStack popStack];
+  LocalTextAction *undidAction = [self.redoStack popStack];
   if (!undidAction) {
     return;
   }
@@ -313,18 +314,18 @@ int lastSelectedLocation = 0;
   [self.undoStack push:undidAction];
 }
 
-- (void)redoAdd:(TextAction *)textAction textView:(UITextView *)textView {
+- (void)redoAdd:(LocalTextAction *)LocalTextAction textView:(UITextView *)textView {
   textView.text = [NSString stringWithFormat:@"%@%@%@",
-                   [textView.text substringToIndex:textAction.range.location],
-                   textAction.text,
-                   [textView.text substringFromIndex:textAction.range.location]];
+                   [textView.text substringToIndex:LocalTextAction.range.location],
+                   LocalTextAction.text,
+                   [textView.text substringFromIndex:LocalTextAction.range.location]];
 }
 
-- (void)redoRemove:(TextAction *)textAction textView:(UITextView *)textView {
+- (void)redoRemove:(LocalTextAction *)LocalTextAction textView:(UITextView *)textView {
   textView.text = [NSString stringWithFormat:@"%@%@",
-                   [textView.text substringToIndex:textAction.range.location],
-                   [textView.text substringFromIndex:(textAction.range.location +
-                                                      textAction.range.length)]];
+                   [textView.text substringToIndex:LocalTextAction.range.location],
+                   [textView.text substringFromIndex:(LocalTextAction.range.location +
+                                                      LocalTextAction.range.length)]];
 }
 
 - (void)resetTimer {
@@ -342,7 +343,7 @@ int lastSelectedLocation = 0;
 #pragma mark Utility
 
 - (void)printQueue:(Deque *)deque {
-  TextAction *action;
+  LocalTextAction *action;
   int count = 0;
   int size = [deque size];
   
