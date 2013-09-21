@@ -1,11 +1,9 @@
-
-
 message CursorUpdate {
   required int32 user = 1;
   required int32 position = 2;
 }
 
-message TextChange {
+message TextUpdate {
   required int32 user = 1;
   enum ChangeType {
     INSERT = 0;

@@ -113,16 +113,18 @@ NSString *sessionName = @"SOMESECRETKEY";
     CursorUpdate *cu = new CursorUpdate();
     cu->MessageLite::ParseFromArray((const void*) CFBridgingRetain(data), data.length);
     
+    CursorAction *action = [[CursorAction alloc] initWithServerUpdate:cu];
+    
     NSLog(@"user: %d, position: %d", cu->user(), cu->position());
+    
+    [self.incomingActions push:action];
     
   } else if ([eventType isEqualToString:@"TextChange"]) {
     // text change
-    TextChange *tc = new TextChange();
+    TextUpdate *tc = new TextUpdate();
     tc->MessageLite::ParseFromArray((const void*) CFBridgingRetain(data), data.length);
     
-    TextAction *action = [[TextAction alloc] init:tc->user()
-                                             text:[NSString stringWithUTF8String:tc->text().c_str()]
-                                         editType:(tc->type() == TextChange::INSERT)? INSERT : REMOVE];
+    ServerTextAction *action = [[ServerTextAction alloc] initWithServerUpdate:tc];
     
     NSLog(@"user: %d, text: %s, type: %d", tc->user(), tc->text().c_str(), tc->type());
         

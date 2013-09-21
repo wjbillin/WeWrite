@@ -33,26 +33,26 @@ void protobuf_AssignDesc_text_2eproto();
 void protobuf_ShutdownFile_text_2eproto();
 
 class CursorUpdate;
-class TextChange;
+class TextUpdate;
 
-enum TextChange_ChangeType {
-  TextChange_ChangeType_INSERT = 0,
-  TextChange_ChangeType_REMOVE = 1
+enum TextUpdate_ChangeType {
+  TextUpdate_ChangeType_INSERT = 0,
+  TextUpdate_ChangeType_REMOVE = 1
 };
-bool TextChange_ChangeType_IsValid(int value);
-const TextChange_ChangeType TextChange_ChangeType_ChangeType_MIN = TextChange_ChangeType_INSERT;
-const TextChange_ChangeType TextChange_ChangeType_ChangeType_MAX = TextChange_ChangeType_REMOVE;
-const int TextChange_ChangeType_ChangeType_ARRAYSIZE = TextChange_ChangeType_ChangeType_MAX + 1;
+bool TextUpdate_ChangeType_IsValid(int value);
+const TextUpdate_ChangeType TextUpdate_ChangeType_ChangeType_MIN = TextUpdate_ChangeType_INSERT;
+const TextUpdate_ChangeType TextUpdate_ChangeType_ChangeType_MAX = TextUpdate_ChangeType_REMOVE;
+const int TextUpdate_ChangeType_ChangeType_ARRAYSIZE = TextUpdate_ChangeType_ChangeType_MAX + 1;
 
-const ::google::protobuf::EnumDescriptor* TextChange_ChangeType_descriptor();
-inline const ::std::string& TextChange_ChangeType_Name(TextChange_ChangeType value) {
+const ::google::protobuf::EnumDescriptor* TextUpdate_ChangeType_descriptor();
+inline const ::std::string& TextUpdate_ChangeType_Name(TextUpdate_ChangeType value) {
   return ::google::protobuf::internal::NameOfEnum(
-    TextChange_ChangeType_descriptor(), value);
+    TextUpdate_ChangeType_descriptor(), value);
 }
-inline bool TextChange_ChangeType_Parse(
-    const ::std::string& name, TextChange_ChangeType* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<TextChange_ChangeType>(
-    TextChange_ChangeType_descriptor(), name, value);
+inline bool TextUpdate_ChangeType_Parse(
+    const ::std::string& name, TextUpdate_ChangeType* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<TextUpdate_ChangeType>(
+    TextUpdate_ChangeType_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -148,14 +148,14 @@ class CursorUpdate : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class TextChange : public ::google::protobuf::Message {
+class TextUpdate : public ::google::protobuf::Message {
  public:
-  TextChange();
-  virtual ~TextChange();
+  TextUpdate();
+  virtual ~TextUpdate();
 
-  TextChange(const TextChange& from);
+  TextUpdate(const TextUpdate& from);
 
-  inline TextChange& operator=(const TextChange& from) {
+  inline TextUpdate& operator=(const TextUpdate& from) {
     CopyFrom(from);
     return *this;
   }
@@ -169,17 +169,17 @@ class TextChange : public ::google::protobuf::Message {
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const TextChange& default_instance();
+  static const TextUpdate& default_instance();
 
-  void Swap(TextChange* other);
+  void Swap(TextUpdate* other);
 
   // implements Message ----------------------------------------------
 
-  TextChange* New() const;
+  TextUpdate* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const TextChange& from);
-  void MergeFrom(const TextChange& from);
+  void CopyFrom(const TextUpdate& from);
+  void MergeFrom(const TextUpdate& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -200,28 +200,28 @@ class TextChange : public ::google::protobuf::Message {
 
   // nested types ----------------------------------------------------
 
-  typedef TextChange_ChangeType ChangeType;
-  static const ChangeType INSERT = TextChange_ChangeType_INSERT;
-  static const ChangeType REMOVE = TextChange_ChangeType_REMOVE;
+  typedef TextUpdate_ChangeType ChangeType;
+  static const ChangeType INSERT = TextUpdate_ChangeType_INSERT;
+  static const ChangeType REMOVE = TextUpdate_ChangeType_REMOVE;
   static inline bool ChangeType_IsValid(int value) {
-    return TextChange_ChangeType_IsValid(value);
+    return TextUpdate_ChangeType_IsValid(value);
   }
   static const ChangeType ChangeType_MIN =
-    TextChange_ChangeType_ChangeType_MIN;
+    TextUpdate_ChangeType_ChangeType_MIN;
   static const ChangeType ChangeType_MAX =
-    TextChange_ChangeType_ChangeType_MAX;
+    TextUpdate_ChangeType_ChangeType_MAX;
   static const int ChangeType_ARRAYSIZE =
-    TextChange_ChangeType_ChangeType_ARRAYSIZE;
+    TextUpdate_ChangeType_ChangeType_ARRAYSIZE;
   static inline const ::google::protobuf::EnumDescriptor*
   ChangeType_descriptor() {
-    return TextChange_ChangeType_descriptor();
+    return TextUpdate_ChangeType_descriptor();
   }
   static inline const ::std::string& ChangeType_Name(ChangeType value) {
-    return TextChange_ChangeType_Name(value);
+    return TextUpdate_ChangeType_Name(value);
   }
   static inline bool ChangeType_Parse(const ::std::string& name,
       ChangeType* value) {
-    return TextChange_ChangeType_Parse(name, value);
+    return TextUpdate_ChangeType_Parse(name, value);
   }
 
   // accessors -------------------------------------------------------
@@ -233,12 +233,12 @@ class TextChange : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 user() const;
   inline void set_user(::google::protobuf::int32 value);
 
-  // required .TextChange.ChangeType type = 2;
+  // required .TextUpdate.ChangeType type = 2;
   inline bool has_type() const;
   inline void clear_type();
   static const int kTypeFieldNumber = 2;
-  inline ::TextChange_ChangeType type() const;
-  inline void set_type(::TextChange_ChangeType value);
+  inline ::TextUpdate_ChangeType type() const;
+  inline void set_type(::TextUpdate_ChangeType value);
 
   // required string text = 3;
   inline bool has_text() const;
@@ -252,7 +252,7 @@ class TextChange : public ::google::protobuf::Message {
   inline ::std::string* release_text();
   inline void set_allocated_text(::std::string* text);
 
-  // @@protoc_insertion_point(class_scope:TextChange)
+  // @@protoc_insertion_point(class_scope:TextUpdate)
  private:
   inline void set_has_user();
   inline void clear_has_user();
@@ -275,7 +275,7 @@ class TextChange : public ::google::protobuf::Message {
   friend void protobuf_ShutdownFile_text_2eproto();
 
   void InitAsDefaultInstance();
-  static TextChange* default_instance_;
+  static TextUpdate* default_instance_;
 };
 // ===================================================================
 
@@ -330,101 +330,101 @@ inline void CursorUpdate::set_position(::google::protobuf::int32 value) {
 
 // -------------------------------------------------------------------
 
-// TextChange
+// TextUpdate
 
 // required int32 user = 1;
-inline bool TextChange::has_user() const {
+inline bool TextUpdate::has_user() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void TextChange::set_has_user() {
+inline void TextUpdate::set_has_user() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void TextChange::clear_has_user() {
+inline void TextUpdate::clear_has_user() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void TextChange::clear_user() {
+inline void TextUpdate::clear_user() {
   user_ = 0;
   clear_has_user();
 }
-inline ::google::protobuf::int32 TextChange::user() const {
+inline ::google::protobuf::int32 TextUpdate::user() const {
   return user_;
 }
-inline void TextChange::set_user(::google::protobuf::int32 value) {
+inline void TextUpdate::set_user(::google::protobuf::int32 value) {
   set_has_user();
   user_ = value;
 }
 
-// required .TextChange.ChangeType type = 2;
-inline bool TextChange::has_type() const {
+// required .TextUpdate.ChangeType type = 2;
+inline bool TextUpdate::has_type() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void TextChange::set_has_type() {
+inline void TextUpdate::set_has_type() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void TextChange::clear_has_type() {
+inline void TextUpdate::clear_has_type() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void TextChange::clear_type() {
+inline void TextUpdate::clear_type() {
   type_ = 0;
   clear_has_type();
 }
-inline ::TextChange_ChangeType TextChange::type() const {
-  return static_cast< ::TextChange_ChangeType >(type_);
+inline ::TextUpdate_ChangeType TextUpdate::type() const {
+  return static_cast< ::TextUpdate_ChangeType >(type_);
 }
-inline void TextChange::set_type(::TextChange_ChangeType value) {
-  assert(::TextChange_ChangeType_IsValid(value));
+inline void TextUpdate::set_type(::TextUpdate_ChangeType value) {
+  assert(::TextUpdate_ChangeType_IsValid(value));
   set_has_type();
   type_ = value;
 }
 
 // required string text = 3;
-inline bool TextChange::has_text() const {
+inline bool TextUpdate::has_text() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void TextChange::set_has_text() {
+inline void TextUpdate::set_has_text() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void TextChange::clear_has_text() {
+inline void TextUpdate::clear_has_text() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void TextChange::clear_text() {
+inline void TextUpdate::clear_text() {
   if (text_ != &::google::protobuf::internal::kEmptyString) {
     text_->clear();
   }
   clear_has_text();
 }
-inline const ::std::string& TextChange::text() const {
+inline const ::std::string& TextUpdate::text() const {
   return *text_;
 }
-inline void TextChange::set_text(const ::std::string& value) {
+inline void TextUpdate::set_text(const ::std::string& value) {
   set_has_text();
   if (text_ == &::google::protobuf::internal::kEmptyString) {
     text_ = new ::std::string;
   }
   text_->assign(value);
 }
-inline void TextChange::set_text(const char* value) {
+inline void TextUpdate::set_text(const char* value) {
   set_has_text();
   if (text_ == &::google::protobuf::internal::kEmptyString) {
     text_ = new ::std::string;
   }
   text_->assign(value);
 }
-inline void TextChange::set_text(const char* value, size_t size) {
+inline void TextUpdate::set_text(const char* value, size_t size) {
   set_has_text();
   if (text_ == &::google::protobuf::internal::kEmptyString) {
     text_ = new ::std::string;
   }
   text_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* TextChange::mutable_text() {
+inline ::std::string* TextUpdate::mutable_text() {
   set_has_text();
   if (text_ == &::google::protobuf::internal::kEmptyString) {
     text_ = new ::std::string;
   }
   return text_;
 }
-inline ::std::string* TextChange::release_text() {
+inline ::std::string* TextUpdate::release_text() {
   clear_has_text();
   if (text_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
@@ -434,7 +434,7 @@ inline ::std::string* TextChange::release_text() {
     return temp;
   }
 }
-inline void TextChange::set_allocated_text(::std::string* text) {
+inline void TextUpdate::set_allocated_text(::std::string* text) {
   if (text_ != &::google::protobuf::internal::kEmptyString) {
     delete text_;
   }
@@ -455,8 +455,8 @@ namespace google {
 namespace protobuf {
 
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::TextChange_ChangeType>() {
-  return ::TextChange_ChangeType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::TextUpdate_ChangeType>() {
+  return ::TextUpdate_ChangeType_descriptor();
 }
 
 }  // namespace google

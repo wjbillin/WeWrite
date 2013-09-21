@@ -7,31 +7,47 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "froto/text.pb.h"
 
 typedef enum {
   INSERT,
   REMOVE
 } EditType;
 
-@interface TextAction : NSObject
+// A text action performed by the local user.
+@interface LocalTextAction : NSObject
 
-@property (nonatomic, assign) NSInteger user;
 @property (nonatomic, assign) NSRange range;
 @property (nonatomic, retain) NSString *text;
 @property (nonatomic, assign) EditType editType;
 
 - (id)init;
-- (id)init:(TextAction *)action;
-- (id)init:(NSRange)range text:(NSString *)text;
-- (id)init:(NSInteger)user text:(NSString *)text editType:(EditType)type;
+- (id)initWithAction:(LocalTextAction *)action;
+- (id)initWithRange:(NSRange)range text:(NSString *)text;
 
 - (EditType)type:(NSRange)range;
 
 @end
 
+// A text action performed by a remote user. Mirrors the generated proto class TextUpdate.
+@interface ServerTextAction : NSObject
+
+@property (nonatomic, assign) NSInteger user;
+@property (nonatomic, retain) NSString* text;
+@property (nonatomic, assign) EditType editType;
+
+- (id)initWithServerUpdate:(TextUpdate *)textUpdate;
+
+@end
+
+// A cursor move action. Mirrors the generated proto class CursorUpdate.
 @interface CursorAction : NSObject
 
 @property (nonatomic, assign) NSInteger user;
 @property (nonatomic, assign) NSInteger position;
+
+- (id)init;
+- (id)initWithServerUpdate:(CursorUpdate *)cursorUpdate;
+- (id)initWithPosition:(NSInteger)position user:(NSInteger)user;
 
 @end
