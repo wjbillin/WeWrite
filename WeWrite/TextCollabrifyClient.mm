@@ -1,5 +1,5 @@
 //
-//  TextCollabrifyClient.m
+//  TextCollabrifyClient.mm
 //  WeWrite
 //
 //  Created by William Joshua Billingham on 9/21/13.
@@ -10,6 +10,7 @@
 #import "TextCollabrifyClient.h"
 #import "CollabrifyClient.h"
 #import "CollabrifySession.h"
+#import "froto/text.pb.h"
 
 @interface TextCollabrifyClient () <CollabrifyClientDelegate, CollabrifyClientDataSource>
 
@@ -89,6 +90,27 @@ NSString *sessionName = @"SOMESECRETKEY";
     [self.textViewController joinedSession];
    
   }];
+}
+
+
+-(void) client:(CollabrifyClient *)client receivedEventWithOrderID:(int64_t)orderID submissionRegistrationID:(int32_t)submissionRegistrationID eventType:(NSString *)eventType data:(NSData *)data {
+  
+  if([eventType isEqualToString:@"CursorUpdate"]) {
+    // cursor change
+    CursorUpdate cu;
+    cu.MessageLite::ParseFromArray((const void*) CFBridgingRetain(data), data.length);
+    
+    NSLog(@"user: %d, position: %d", cu.user(), cu.position());
+    
+  } else if ([eventType isEqualToString:@"TextChange"]) {
+    // text change
+    TextChange tc;
+    tc.MessageLite::ParseFromArray((const void*) CFBridgingRetain(data), data.length);
+    
+    NSLog(@"user: %d, text: %s, type: %d", tc.user(), tc.text().c_str(), tc.type());
+  }
+  
+  
 }
 
 @end

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B3325B6017ED56BB0038D870 /* TextCollabrifyClient.m in Sources */ = {isa = PBXBuildFile; fileRef = B3325B5F17ED56BB0038D870 /* TextCollabrifyClient.m */; };
+		B3325B6017ED56BB0038D870 /* TextCollabrifyClient.mm in Sources */ = {isa = PBXBuildFile; fileRef = B3325B5F17ED56BB0038D870 /* TextCollabrifyClient.mm */; };
 		B3325B6317ED725F0038D870 /* SplashViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B3325B6217ED725F0038D870 /* SplashViewController.m */; };
 		B3709DD817E146C300FAEE34 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3709DD717E146C300FAEE34 /* UIKit.framework */; };
 		B3709DDA17E146C300FAEE34 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3709DD917E146C300FAEE34 /* Foundation.framework */; };
@@ -35,6 +35,7 @@
 		B38B664817EDBB4800DDA8EF /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B38B664717EDBB4800DDA8EF /* libstdc++.dylib */; };
 		F516A39A17EDC9150076E529 /* text.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = F516A39717EDC9150076E529 /* text.pb.cc */; };
 		F516A39B17EDC9150076E529 /* text.proto in Resources */ = {isa = PBXBuildFile; fileRef = F516A39917EDC9150076E529 /* text.proto */; };
+		F516A39E17EDD25D0076E529 /* TextAction.m in Sources */ = {isa = PBXBuildFile; fileRef = F516A39D17EDD25D0076E529 /* TextAction.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,7 +50,7 @@
 
 /* Begin PBXFileReference section */
 		B3325B5E17ED56BB0038D870 /* TextCollabrifyClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextCollabrifyClient.h; sourceTree = "<group>"; };
-		B3325B5F17ED56BB0038D870 /* TextCollabrifyClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextCollabrifyClient.m; sourceTree = "<group>"; };
+		B3325B5F17ED56BB0038D870 /* TextCollabrifyClient.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TextCollabrifyClient.mm; sourceTree = "<group>"; };
 		B3325B6117ED725E0038D870 /* SplashViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SplashViewController.h; sourceTree = "<group>"; };
 		B3325B6217ED725F0038D870 /* SplashViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SplashViewController.m; sourceTree = "<group>"; };
 		B3709DD417E146C300FAEE34 /* WeWrite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeWrite.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,6 +88,8 @@
 		F516A39717EDC9150076E529 /* text.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = text.pb.cc; sourceTree = "<group>"; };
 		F516A39817EDC9150076E529 /* text.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = text.pb.h; sourceTree = "<group>"; };
 		F516A39917EDC9150076E529 /* text.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = text.proto; sourceTree = "<group>"; };
+		F516A39C17EDD25D0076E529 /* TextAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextAction.h; sourceTree = "<group>"; };
+		F516A39D17EDD25D0076E529 /* TextAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextAction.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,11 +168,13 @@
 				B3325B6117ED725E0038D870 /* SplashViewController.h */,
 				B3325B6217ED725F0038D870 /* SplashViewController.m */,
 				B3325B5E17ED56BB0038D870 /* TextCollabrifyClient.h */,
-				B3325B5F17ED56BB0038D870 /* TextCollabrifyClient.m */,
+				B3325B5F17ED56BB0038D870 /* TextCollabrifyClient.mm */,
 				B3709DF517E146C300FAEE34 /* TextViewController.h */,
 				B3709DF617E146C300FAEE34 /* TextViewController.m */,
 				B3709EBB17E17C7B00FAEE34 /* TextViewDelegate.h */,
 				B3709EBC17E17C7C00FAEE34 /* TextViewDelegate.m */,
+				F516A39C17EDD25D0076E529 /* TextAction.h */,
+				F516A39D17EDD25D0076E529 /* TextAction.m */,
 				B3709DDE17E146C300FAEE34 /* Supporting Files */,
 			);
 			path = WeWrite;
@@ -332,8 +337,9 @@
 				B3709DE417E146C300FAEE34 /* main.m in Sources */,
 				B3709DE817E146C300FAEE34 /* AppDelegate.m in Sources */,
 				B3709DF717E146C300FAEE34 /* TextViewController.m in Sources */,
+				F516A39E17EDD25D0076E529 /* TextAction.m in Sources */,
 				F516A39A17EDC9150076E529 /* text.pb.cc in Sources */,
-				B3325B6017ED56BB0038D870 /* TextCollabrifyClient.m in Sources */,
+				B3325B6017ED56BB0038D870 /* TextCollabrifyClient.mm in Sources */,
 				B3325B6317ED725F0038D870 /* SplashViewController.m in Sources */,
 				B3709EBD17E17C7C00FAEE34 /* TextViewDelegate.m in Sources */,
 				B3709EC117E2749800FAEE34 /* Deque.m in Sources */,
