@@ -33,6 +33,8 @@
 		B3709EC117E2749800FAEE34 /* Deque.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709EC017E2749800FAEE34 /* Deque.m */; };
 		B3709EC217E2749800FAEE34 /* Deque.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709EC017E2749800FAEE34 /* Deque.m */; };
 		B38B664817EDBB4800DDA8EF /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B38B664717EDBB4800DDA8EF /* libstdc++.dylib */; };
+		F516A39A17EDC9150076E529 /* text.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = F516A39717EDC9150076E529 /* text.pb.cc */; };
+		F516A39B17EDC9150076E529 /* text.proto in Resources */ = {isa = PBXBuildFile; fileRef = F516A39917EDC9150076E529 /* text.proto */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,6 +84,9 @@
 		B3709EBF17E2749800FAEE34 /* Deque.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Deque.h; sourceTree = "<group>"; };
 		B3709EC017E2749800FAEE34 /* Deque.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Deque.m; sourceTree = "<group>"; };
 		B38B664717EDBB4800DDA8EF /* libstdc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.dylib"; path = "usr/lib/libstdc++.dylib"; sourceTree = SDKROOT; };
+		F516A39717EDC9150076E529 /* text.pb.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = text.pb.cc; sourceTree = "<group>"; };
+		F516A39817EDC9150076E529 /* text.pb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = text.pb.h; sourceTree = "<group>"; };
+		F516A39917EDC9150076E529 /* text.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = text.proto; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,6 +155,7 @@
 		B3709DDD17E146C300FAEE34 /* WeWrite */ = {
 			isa = PBXGroup;
 			children = (
+				F516A39617EDC9150076E529 /* froto */,
 				B3709E1717E16DC400FAEE34 /* Collabrify.framework */,
 				B3709E1A17E16E4C00FAEE34 /* config.h */,
 				B3709DE617E146C300FAEE34 /* AppDelegate.h */,
@@ -200,6 +206,16 @@
 				B3709E0717E146C300FAEE34 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		F516A39617EDC9150076E529 /* froto */ = {
+			isa = PBXGroup;
+			children = (
+				F516A39717EDC9150076E529 /* text.pb.cc */,
+				F516A39817EDC9150076E529 /* text.pb.h */,
+				F516A39917EDC9150076E529 /* text.proto */,
+			);
+			path = froto;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -276,6 +292,7 @@
 				B3709DE217E146C300FAEE34 /* InfoPlist.strings in Resources */,
 				B3709DEA17E146C300FAEE34 /* Default.png in Resources */,
 				B3709DEC17E146C300FAEE34 /* Default@2x.png in Resources */,
+				F516A39B17EDC9150076E529 /* text.proto in Resources */,
 				B3709DEE17E146C300FAEE34 /* Default-568h@2x.png in Resources */,
 				B3709E1617E16DB000FAEE34 /* Collabrify.bundle in Resources */,
 			);
@@ -315,6 +332,7 @@
 				B3709DE417E146C300FAEE34 /* main.m in Sources */,
 				B3709DE817E146C300FAEE34 /* AppDelegate.m in Sources */,
 				B3709DF717E146C300FAEE34 /* TextViewController.m in Sources */,
+				F516A39A17EDC9150076E529 /* text.pb.cc in Sources */,
 				B3325B6017ED56BB0038D870 /* TextCollabrifyClient.m in Sources */,
 				B3325B6317ED725F0038D870 /* SplashViewController.m in Sources */,
 				B3709EBD17E17C7C00FAEE34 /* TextViewDelegate.m in Sources */,
@@ -432,13 +450,13 @@
 				GCC_PREFIX_HEADER = "WeWrite/WeWrite-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/Collabrify.framework/Headers\"",
-					"\"$(SRCROOT)/protobuf/protobuf-2.5.0/src/google\"",
+					"\"$(SRCROOT)/protobuf/protobuf-2.5.0/src/\"",
 				);
 				INFOPLIST_FILE = "WeWrite/WeWrite-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"/Users/joshbillingham/Code/eecs441/WeWrite/WeWrite/protobuf/protobuf-2.5.0/gtest/lib/.libs",
-					"/Users/joshbillingham/Code/eecs441/WeWrite/WeWrite/protobuf/protobuf-2.5.0/src/.libs",
+					"$(SRCROOT)/protobuf/protobuf-2.5.0/gtest/lib/.libs",
+					"$(SRCROOT)/protobuf/protobuf-2.5.0/src/.libs",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
@@ -457,13 +475,13 @@
 				GCC_PREFIX_HEADER = "WeWrite/WeWrite-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/Collabrify.framework/Headers\"",
-					"\"$(SRCROOT)/protobuf/protobuf-2.5.0/src/google\"",
+					"\"$(SRCROOT)/protobuf/protobuf-2.5.0/src/\"",
 				);
 				INFOPLIST_FILE = "WeWrite/WeWrite-Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"/Users/joshbillingham/Code/eecs441/WeWrite/WeWrite/protobuf/protobuf-2.5.0/gtest/lib/.libs",
-					"/Users/joshbillingham/Code/eecs441/WeWrite/WeWrite/protobuf/protobuf-2.5.0/src/.libs",
+					"$(SRCROOT)/protobuf/protobuf-2.5.0/gtest/lib/.libs",
+					"$(SRCROOT)/protobuf/protobuf-2.5.0/src/.libs",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;

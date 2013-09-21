@@ -17,7 +17,7 @@ old_library='libgtest_main.a'
 inherited_linker_flags=' '
 
 # Libraries that this one depends upon.
-dependency_libs=' /Users/joshbillingham/Code/eecs441/WeWrite/protobuf/protobuf-2.5.0/gtest/lib/libgtest.la'
+dependency_libs=' /Users/ottosipe/Dropbox/*Michigan/EECS441/WeWrite/protobuf/protobuf-2.5.0/gtest/lib/libgtest.la'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
