@@ -36,7 +36,7 @@
 }
 
 - (EditType)type:(NSRange)range{
-  return (range.length == 0) ? INSERT : DELETE;
+  return (range.length == 0) ? INSERT : REMOVE;
 }
 
 @end

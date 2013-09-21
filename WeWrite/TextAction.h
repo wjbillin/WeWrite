@@ -10,11 +10,12 @@
 
 typedef enum {
   INSERT,
-  DELETE
+  REMOVE
 } EditType;
 
 @interface TextAction : NSObject
 
+@property (nonatomic, assign) NSInteger user;
 @property (nonatomic, assign) NSRange range;
 @property (nonatomic, retain) NSString *text;
 @property (nonatomic, assign) EditType editType;

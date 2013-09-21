@@ -11,6 +11,7 @@
 #import "CollabrifyClient.h"
 #import "CollabrifySession.h"
 #import "froto/text.pb.h"
+#import "TextAction.h"
 
 @interface TextCollabrifyClient () <CollabrifyClientDelegate, CollabrifyClientDataSource>
 
@@ -107,9 +108,14 @@ NSString *sessionName = @"SOMESECRETKEY";
     TextChange tc;
     tc.MessageLite::ParseFromArray((const void*) CFBridgingRetain(data), data.length);
     
+    TextAction *action = [[TextAction alloc] init];
+    
+    [action setUser:tc.user()];
+    [action setText:[NSString stringWithUTF8String:tc.text().c_str()]];
+    [action setEditType:(tc.type() == TextChange::INSERT)? INSERT : REMOVE];
+    
     NSLog(@"user: %d, text: %s, type: %d", tc.user(), tc.text().c_str(), tc.type());
   }
-  
   
 }
 
