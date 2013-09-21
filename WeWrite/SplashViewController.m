@@ -40,7 +40,6 @@
             forControlEvents:UIControlEventTouchUpInside];
 
   [self.view addSubview:self.joinButton];
-  // money
 }
 
 - (void)addSpinny {

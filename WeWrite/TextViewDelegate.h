@@ -19,6 +19,7 @@
 @property (nonatomic, retain) Deque *currentEdit;
 @property (nonatomic, retain) NSTimer *timer;
 
+- (void)mergeCurrentEdit;
 - (void)undo:(UITextView *)textView;
 - (void)redo:(UITextView *)textView;
 

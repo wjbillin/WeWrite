@@ -22,6 +22,9 @@ typedef enum {
 
 @end
 
+BOOL selectionChangeFromInput = NO;
+int lastSelectedLocation = 0;
+
 @implementation TextAction
 
 - (id)init {
@@ -67,6 +70,7 @@ typedef enum {
     _redoStack = [[Deque alloc] init];
     _undoStack = [[Deque alloc] init];
     _currentEdit = [[Deque alloc] init];
+    _timer = [[NSTimer alloc] init];
   }
   
   return self;
@@ -76,11 +80,11 @@ typedef enum {
     shouldChangeTextInRange:(NSRange)range
             replacementText:(NSString *)text {
   
-  /*NSLog(@"Delegate called, location: %d, length: %d, selected location: %d, text is [%@]",
+  NSLog(@"Delegate called, location: %d, length: %d, selected location: %d, text is [%@]",
         range.location,
         range.length,
         textView.selectedRange.location,
-        text);*/
+        text);
   
   if (range.location == 0 && range.length == 0 && text.length == 0) {
     // User is backspacing at the beginning of the document. Don't bother recording anything.
@@ -107,6 +111,11 @@ typedef enum {
   
   // If the timer is currently running, we want to stop it before scheduling it again.
   [self resetTimer];
+  
+  if ([[UIDevice currentDevice] systemVersion].intValue > 6) {
+    NSLog(@"changing selection from input to YES");
+    selectionChangeFromInput = YES;
+  }
   
   // Clear the redo stack if we're editing.
   [self.redoStack clear];
@@ -143,23 +152,33 @@ typedef enum {
 }
 
 - (void)textViewDidChangeSelection:(UITextView *)textView {
-  // User has moved their cursor. Merge any pending edits.
-  if (self.timer && self.timer.isValid) {
-    [self.timer invalidate];
+  NSLog(@"text view did change selection, location: %d", textView.selectedRange.location);
+  if (selectionChangeFromInput || textView.selectedRange.location == lastSelectedLocation) {
+    selectionChangeFromInput = NO;
+  } else {
+    NSLog(@"invalidating timer from cursor change");
+  
+    if (self.timer.isValid) {
+      [self.timer invalidate];
+    }
+    [self mergeCurrentEdit];
   }
-  [self mergeCurrentEdit];
+  
+  lastSelectedLocation = textView.selectedRange.location;
 }
 
 - (void)mergeCurrentEdit {
+  NSLog(@"Merge current Edit ***");
+  
+  if ([self.currentEdit empty]) {
+    return;
+  }
+  
   // First, merge individual edits (usually insert/remove a single char) into group edits.
   Deque *mergedEdits = [self mergeSingleEdits];
   
   // Debug print.
   [self printQueue:mergedEdits];
-  
-  if ([mergedEdits empty]) {
-    return;
-  }
   
   // Now, merge group add/delete sequences as much as possible.
   Deque *finalEdits = [self resolveMergedEdits:mergedEdits];
@@ -218,7 +237,7 @@ typedef enum {
   TextAction *lastAction = [mergedEdits back];
   int smallestIndex, ogCursorIndex;
   smallestIndex = ogCursorIndex = lastAction.range.location;
-  NSLog(@"smallest index is %d", smallestIndex);
+  //NSLog(@"smallest index is %d", smallestIndex);
   
   TextAction *curAction = [mergedEdits popQueue];
   [finalEdits push:curAction];
@@ -275,7 +294,7 @@ typedef enum {
 #pragma mark Undo and Redo
 
 - (void)undo:(UITextView *)textView {
-  [self resetTimer];
+  [self.timer invalidate];
   [self mergeCurrentEdit];
 
   TextAction *lastAction = [self.undoStack popStack];
@@ -293,6 +312,7 @@ typedef enum {
     [self undoAdd:lastAction textView:textView];
   }
   [self.redoStack push:lastAction];
+  selectionChangeFromInput = YES;
 }
 
 - (void)undoAdd:(TextAction *)addAction textView:(UITextView *)textView {
@@ -309,7 +329,7 @@ typedef enum {
 }
 
 - (void)redo:(UITextView *)textView {
-  [self resetTimer];
+  [self.timer invalidate];
   [self mergeCurrentEdit];
 
   TextAction *undidAction = [self.redoStack popStack];
