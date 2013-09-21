@@ -20,3 +20,5 @@ UserInterfaceState.xcuserstate
 *.xcbkptlist
 Cache.db
 
+protobuf/
+
