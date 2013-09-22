@@ -145,7 +145,7 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
   
   NSLog(@"received Event! cool!");
   
-  if([eventType isEqualToString:@"CursorUpdate"]) {
+  if([eventType isEqualToString:CURSOR_EVENT]) {
     // cursor change
     CursorUpdate *cu = new CursorUpdate();
     cu->ParseFromArray([data bytes], data.length);
@@ -156,7 +156,7 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
     
     [self.incomingActions push:action];
     
-  } else if ([eventType isEqualToString:@"TextChange"]) {
+  } else if ([eventType isEqualToString:TEXT_EVENT]) {
     // text change
     TextUpdate *tc = new TextUpdate();
     tc->ParseFromArray([data bytes], data.length);
