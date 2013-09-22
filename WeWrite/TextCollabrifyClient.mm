@@ -46,6 +46,8 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
                                        getLatestEvent:NO
                                                 error:&err];
   
+    _userCursors = [[NSMutableDictionary alloc] init];
+    
     [[self client] setDelegate:self];
     [[self client] setDataSource:self];
   }
@@ -132,9 +134,31 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 }
 
 - (void)receiveActions {
+  
+  Deque *incomingTextEdits = [[Deque alloc] init];
+  
   // record cursor movements
-  ServerTextAction *action;
-  while ((action = [self.incomingActions popQueue])) {
+  while ([self.incomingActions size] != 0) {
+    if([[self.incomingActions front] isKindOfClass:CursorAction.class]) {
+      // this is a cursor movement
+      CursorAction *cursor = [self.incomingActions popQueue];
+      
+      [self.userCursors setObject:@(cursor.position) forKey:@(cursor.user)];
+      
+    } else {
+      // this is a text add
+      [incomingTextEdits push:[self.incomingActions popQueue]];
+      
+      [[NSNotificationCenter defaultCenter] postNotification:[NSNotification
+                                                              notificationWithName:@"TEXT_RECEIVED"
+                                                              object:incomingTextEdits]];
+      
+      // add this code to the delagate (after I'm done drinking
+      /*[[NSNotificationCenter defaultCenter] addObserver:self
+                                               selector:@selector(XXX)
+                                                   name:@"TEXT_RECEIVED"
+                                                 object:nil];*/
+    }
     
   }
   
@@ -142,8 +166,6 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 }
 
 -(void) client:(CollabrifyClient *)client receivedEventWithOrderID:(int64_t)orderID submissionRegistrationID:(int32_t)submissionRegistrationID eventType:(NSString *)eventType data:(NSData *)data {
-  
-  NSLog(@"received Event! cool!");
   
   if([eventType isEqualToString:CURSOR_EVENT]) {
     // cursor change

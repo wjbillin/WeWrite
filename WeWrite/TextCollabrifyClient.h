@@ -16,6 +16,7 @@
 @property (nonatomic, retain) CollabrifyClient* client;
 @property (nonatomic, retain) NSMutableDictionary *unconfirmedActions;
 @property (nonatomic, retain) Deque *incomingActions;
+@property (nonatomic, retain) NSMutableDictionary *userCursors;
 
 + (id)sharedClient;
 
