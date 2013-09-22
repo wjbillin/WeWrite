@@ -18,7 +18,9 @@
 
 @end
 
-NSString *sessionName = @"SOMESECRETKEY";
+NSString* SESSION_NAME = @"SOMESECRETKEY";
+NSString* TEXT_EVENT = @"TEXT_EVENT";
+NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 
 @implementation TextCollabrifyClient
 
@@ -58,7 +60,7 @@ NSString *sessionName = @"SOMESECRETKEY";
       BOOL found = NO;
                       
       for(CollabrifySession *session in sessionList) {
-        if ([session.sessionName isEqualToString:sessionName]) {
+        if ([session.sessionName isEqualToString:SESSION_NAME]) {
           found = YES;
           [self joinSession:session];
         }
@@ -92,7 +94,7 @@ NSString *sessionName = @"SOMESECRETKEY";
 }
 
 - (void)createSession {
-  [self.client createSessionWithName:sessionName
+  [self.client createSessionWithName:SESSION_NAME
                                 tags: @[@"eecs441"]
                             password:nil
                          startPaused:NO
@@ -103,6 +105,30 @@ NSString *sessionName = @"SOMESECRETKEY";
 
 - (void)sendTextActions:(Deque *)finalEdits {
   NSLog(@"The text did change. %d edits.", finalEdits.size);
+  
+  LocalTextAction* action;
+  while ((action = [finalEdits popQueue])) {
+    TextUpdate* textUpdate = new TextUpdate();
+    textUpdate->set_user(self.client.participantID);
+    textUpdate->set_type(
+        (action.editType == INSERT) ? TextUpdate_ChangeType_INSERT : TextUpdate_ChangeType_REMOVE);
+    textUpdate->set_text([action.text cStringUsingEncoding:[NSString defaultCStringEncoding]]);
+    
+    // Serialize the proto.
+    int size = textUpdate->ByteSize();
+    void* buffer = malloc(size);
+    textUpdate->SerializeToArray(buffer, size);
+    
+    // Broadcast the proto.
+    int submissionID =
+        [self.client broadcast:[NSData dataWithBytes:buffer length:size] eventType:TEXT_EVENT];
+    
+    if (submissionID == -1) {
+      NSLog(@"Error broadcasting. Aborting call.");
+      return;
+    }
+    [self.unconfirmedActions setObject:action forKey:[NSString stringWithFormat:@"%d", submissionID]];
+  }
 }
 
 - (void)receiveActions {
@@ -117,21 +143,23 @@ NSString *sessionName = @"SOMESECRETKEY";
 
 -(void) client:(CollabrifyClient *)client receivedEventWithOrderID:(int64_t)orderID submissionRegistrationID:(int32_t)submissionRegistrationID eventType:(NSString *)eventType data:(NSData *)data {
   
+  NSLog(@"received Event! cool!");
+  
   if([eventType isEqualToString:@"CursorUpdate"]) {
     // cursor change
     CursorUpdate *cu = new CursorUpdate();
-    cu->MessageLite::ParseFromArray([data bytes], data.length);
+    cu->ParseFromArray([data bytes], data.length);
     
     CursorAction *action = [[CursorAction alloc] initWithPosition:cu->position() user:cu->user()];
     
-    NSLog(@"user: %d, position: %d", cu->user(), cu->position());
+    NSLog(@"user: %lld, position: %d", cu->user(), cu->position());
     
     [self.incomingActions push:action];
     
   } else if ([eventType isEqualToString:@"TextChange"]) {
     // text change
     TextUpdate *tc = new TextUpdate();
-    tc->MessageLite::ParseFromArray([data bytes], data.length);
+    tc->ParseFromArray([data bytes], data.length);
     
     NSString* textString = [NSString stringWithCString:tc->text().c_str()
                                               encoding:[NSString defaultCStringEncoding]];
@@ -141,7 +169,7 @@ NSString *sessionName = @"SOMESECRETKEY";
                                                   text:textString
                                               editType:editType];
     
-    NSLog(@"user: %d, text: %s, type: %d", tc->user(), tc->text().c_str(), tc->type());
+    NSLog(@"user: %lld, text: %s, type: %d", tc->user(), tc->text().c_str(), tc->type());
         
     [self.incomingActions push:action];
   }
