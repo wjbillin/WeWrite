@@ -105,6 +105,16 @@ NSString *sessionName = @"SOMESECRETKEY";
   NSLog(@"The text did change. %d edits.", finalEdits.size);
 }
 
+- (void)receiveActions {
+  // record cursor movements
+  ServerTextAction *action;
+  while ((action = [self.incomingActions popQueue])) {
+    
+  }
+  
+  // notify TextViewDelegate with changes
+}
+
 -(void) client:(CollabrifyClient *)client receivedEventWithOrderID:(int64_t)orderID submissionRegistrationID:(int32_t)submissionRegistrationID eventType:(NSString *)eventType data:(NSData *)data {
   
   if([eventType isEqualToString:@"CursorUpdate"]) {
@@ -135,6 +145,10 @@ NSString *sessionName = @"SOMESECRETKEY";
         
     [self.incomingActions push:action];
   }
+  
+  // ingest and rectify the actions
+  [self receiveActions];
+  
 }
 
 @end
