@@ -104,8 +104,8 @@ void protobuf_AddDesc_text_2eproto() {
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\ntext.proto\".\n\014CursorUpdate\022\014\n\004user\030\001 \002"
-    "(\005\022\020\n\010position\030\002 \002(\005\"t\n\nTextUpdate\022\014\n\004us"
-    "er\030\001 \002(\005\022$\n\004type\030\002 \002(\0162\026.TextUpdate.Chan"
+    "(\003\022\020\n\010position\030\002 \002(\005\"t\n\nTextUpdate\022\014\n\004us"
+    "er\030\001 \002(\003\022$\n\004type\030\002 \002(\0162\026.TextUpdate.Chan"
     "geType\022\014\n\004text\030\003 \002(\t\"$\n\nChangeType\022\n\n\006IN"
     "SERT\020\000\022\n\n\006REMOVE\020\001", 178);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
@@ -147,7 +147,7 @@ CursorUpdate::CursorUpdate(const CursorUpdate& from)
 
 void CursorUpdate::SharedCtor() {
   _cached_size_ = 0;
-  user_ = 0;
+  user_ = GOOGLE_LONGLONG(0);
   position_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -184,7 +184,7 @@ CursorUpdate* CursorUpdate::New() const {
 
 void CursorUpdate::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    user_ = 0;
+    user_ = GOOGLE_LONGLONG(0);
     position_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -197,12 +197,12 @@ bool CursorUpdate::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required int32 user = 1;
+      // required int64 user = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
                  input, &user_)));
           set_has_user();
         } else {
@@ -246,9 +246,9 @@ bool CursorUpdate::MergePartialFromCodedStream(
 
 void CursorUpdate::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // required int32 user = 1;
+  // required int64 user = 1;
   if (has_user()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->user(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(1, this->user(), output);
   }
 
   // required int32 position = 2;
@@ -264,9 +264,9 @@ void CursorUpdate::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* CursorUpdate::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // required int32 user = 1;
+  // required int64 user = 1;
   if (has_user()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->user(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(1, this->user(), target);
   }
 
   // required int32 position = 2;
@@ -285,10 +285,10 @@ int CursorUpdate::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required int32 user = 1;
+    // required int64 user = 1;
     if (has_user()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
           this->user());
     }
 
@@ -418,7 +418,7 @@ TextUpdate::TextUpdate(const TextUpdate& from)
 
 void TextUpdate::SharedCtor() {
   _cached_size_ = 0;
-  user_ = 0;
+  user_ = GOOGLE_LONGLONG(0);
   type_ = 0;
   text_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -459,7 +459,7 @@ TextUpdate* TextUpdate::New() const {
 
 void TextUpdate::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    user_ = 0;
+    user_ = GOOGLE_LONGLONG(0);
     type_ = 0;
     if (has_text()) {
       if (text_ != &::google::protobuf::internal::kEmptyString) {
@@ -477,12 +477,12 @@ bool TextUpdate::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required int32 user = 1;
+      // required int64 user = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
                  input, &user_)));
           set_has_user();
         } else {
@@ -548,9 +548,9 @@ bool TextUpdate::MergePartialFromCodedStream(
 
 void TextUpdate::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // required int32 user = 1;
+  // required int64 user = 1;
   if (has_user()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->user(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(1, this->user(), output);
   }
 
   // required .TextUpdate.ChangeType type = 2;
@@ -576,9 +576,9 @@ void TextUpdate::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* TextUpdate::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // required int32 user = 1;
+  // required int64 user = 1;
   if (has_user()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->user(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(1, this->user(), target);
   }
 
   // required .TextUpdate.ChangeType type = 2;
@@ -608,10 +608,10 @@ int TextUpdate::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required int32 user = 1;
+    // required int64 user = 1;
     if (has_user()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
           this->user());
     }
 

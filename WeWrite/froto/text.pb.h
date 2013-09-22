@@ -110,12 +110,12 @@ class CursorUpdate : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required int32 user = 1;
+  // required int64 user = 1;
   inline bool has_user() const;
   inline void clear_user();
   static const int kUserFieldNumber = 1;
-  inline ::google::protobuf::int32 user() const;
-  inline void set_user(::google::protobuf::int32 value);
+  inline ::google::protobuf::int64 user() const;
+  inline void set_user(::google::protobuf::int64 value);
 
   // required int32 position = 2;
   inline bool has_position() const;
@@ -133,7 +133,7 @@ class CursorUpdate : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int32 user_;
+  ::google::protobuf::int64 user_;
   ::google::protobuf::int32 position_;
 
   mutable int _cached_size_;
@@ -226,12 +226,12 @@ class TextUpdate : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required int32 user = 1;
+  // required int64 user = 1;
   inline bool has_user() const;
   inline void clear_user();
   static const int kUserFieldNumber = 1;
-  inline ::google::protobuf::int32 user() const;
-  inline void set_user(::google::protobuf::int32 value);
+  inline ::google::protobuf::int64 user() const;
+  inline void set_user(::google::protobuf::int64 value);
 
   // required .TextUpdate.ChangeType type = 2;
   inline bool has_type() const;
@@ -263,9 +263,9 @@ class TextUpdate : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int32 user_;
-  int type_;
+  ::google::protobuf::int64 user_;
   ::std::string* text_;
+  int type_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
@@ -284,7 +284,7 @@ class TextUpdate : public ::google::protobuf::Message {
 
 // CursorUpdate
 
-// required int32 user = 1;
+// required int64 user = 1;
 inline bool CursorUpdate::has_user() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -295,13 +295,13 @@ inline void CursorUpdate::clear_has_user() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void CursorUpdate::clear_user() {
-  user_ = 0;
+  user_ = GOOGLE_LONGLONG(0);
   clear_has_user();
 }
-inline ::google::protobuf::int32 CursorUpdate::user() const {
+inline ::google::protobuf::int64 CursorUpdate::user() const {
   return user_;
 }
-inline void CursorUpdate::set_user(::google::protobuf::int32 value) {
+inline void CursorUpdate::set_user(::google::protobuf::int64 value) {
   set_has_user();
   user_ = value;
 }
@@ -332,7 +332,7 @@ inline void CursorUpdate::set_position(::google::protobuf::int32 value) {
 
 // TextUpdate
 
-// required int32 user = 1;
+// required int64 user = 1;
 inline bool TextUpdate::has_user() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -343,13 +343,13 @@ inline void TextUpdate::clear_has_user() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void TextUpdate::clear_user() {
-  user_ = 0;
+  user_ = GOOGLE_LONGLONG(0);
   clear_has_user();
 }
-inline ::google::protobuf::int32 TextUpdate::user() const {
+inline ::google::protobuf::int64 TextUpdate::user() const {
   return user_;
 }
-inline void TextUpdate::set_user(::google::protobuf::int32 value) {
+inline void TextUpdate::set_user(::google::protobuf::int64 value) {
   set_has_user();
   user_ = value;
 }
