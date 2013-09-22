@@ -29,6 +29,11 @@ int lastSelectedLocation = 0;
     _timer = [[NSTimer alloc] init];
   }
   
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(renderIncomingEdits)
+                                               name:@"TEXT_RECEIVED"
+                                             object:self.incomingEdits];
+
   return self;
 }
 
@@ -254,6 +259,16 @@ int lastSelectedLocation = 0;
   
   return finalEdits;
 }
+
+- (void)renderIncomingEdits {
+  NSLog(@"TIME TO RENDER THE NEW EVENTS");
+  
+  ServerTextAction *a = nil;
+  while ((a = [self.incomingEdits popQueue])) {
+    NSLog(@"user: %ld, text: %@, type: %@", (long)a.user, a.text, (a.editType) ? @"REMOVE" : @"INSERT");
+  }
+}
+
 
 #pragma mark -
 #pragma mark Undo and Redo

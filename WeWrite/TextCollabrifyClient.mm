@@ -152,12 +152,6 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
       [[NSNotificationCenter defaultCenter] postNotification:[NSNotification
                                                               notificationWithName:@"TEXT_RECEIVED"
                                                               object:incomingTextEdits]];
-      
-      // add this code to the delagate (after I'm done drinking
-      /*[[NSNotificationCenter defaultCenter] addObserver:self
-                                               selector:@selector(XXX)
-                                                   name:@"TEXT_RECEIVED"
-                                                 object:nil];*/
     }
     
   }
@@ -191,7 +185,7 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
                                                   text:textString
                                               editType:editType];
     
-    NSLog(@"user: %lld, text: %s, type: %d", tc->user(), tc->text().c_str(), tc->type());
+    //NSLog(@"user: %lld, text: %s, type: %d", tc->user(), tc->text().c_str(), tc->type());
         
     [self.incomingActions push:action];
   }

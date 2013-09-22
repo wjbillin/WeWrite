@@ -19,6 +19,7 @@
 @property (nonatomic, retain) Deque *redoStack;
 @property (nonatomic, retain) Deque *undoStack;
 @property (nonatomic, retain) Deque *currentEdit;
+@property (nonatomic, retain) Deque *incomingEdits;
 @property (nonatomic, retain) NSTimer *timer;
 
 - (id)init;
