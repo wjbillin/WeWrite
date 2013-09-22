@@ -35,7 +35,6 @@ NSString *sessionName = @"SOMESECRETKEY";
 
 - (id)init {
   if (self = [super init]) {
-    
     // Init our client.
     NSError *err;
     _client = [[CollabrifyClient alloc] initWithGmail:@"wjbillin@umich.edu"
@@ -111,7 +110,7 @@ NSString *sessionName = @"SOMESECRETKEY";
   if([eventType isEqualToString:@"CursorUpdate"]) {
     // cursor change
     CursorUpdate *cu = new CursorUpdate();
-    cu->MessageLite::ParseFromArray((const void*) CFBridgingRetain(data), data.length);
+    cu->MessageLite::ParseFromArray([data bytes], data.length);
     
     CursorAction *action = [[CursorAction alloc] initWithPosition:cu->position() user:cu->user()];
     
@@ -122,7 +121,7 @@ NSString *sessionName = @"SOMESECRETKEY";
   } else if ([eventType isEqualToString:@"TextChange"]) {
     // text change
     TextUpdate *tc = new TextUpdate();
-    tc->MessageLite::ParseFromArray((const void*) CFBridgingRetain(data), data.length);
+    tc->MessageLite::ParseFromArray([data bytes], data.length);
     
     NSString* textString = [NSString stringWithCString:tc->text().c_str()
                                               encoding:[NSString defaultCStringEncoding]];
@@ -135,7 +134,6 @@ NSString *sessionName = @"SOMESECRETKEY";
     NSLog(@"user: %d, text: %s, type: %d", tc->user(), tc->text().c_str(), tc->type());
         
     [self.incomingActions push:action];
-    
   }
 }
 
