@@ -112,6 +112,10 @@ int lastSelectedLocation = 0;
 
 - (void)textViewDidChangeSelection:(UITextView *)textView {
   //NSLog(@"text view did change selection, location: %d", textView.selectedRange.location);
+  
+  // broadcast cursor move change
+  [[TextCollabrifyClient sharedClient] sendCursorMove: textView.selectedRange.location];
+
   if (selectionChangeFromInput || textView.selectedRange.location == lastSelectedLocation) {
     selectionChangeFromInput = NO;
   } else {
