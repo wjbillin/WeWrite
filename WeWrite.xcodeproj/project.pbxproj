@@ -50,7 +50,7 @@
 
 /* Begin PBXFileReference section */
 		B3325B5E17ED56BB0038D870 /* TextCollabrifyClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextCollabrifyClient.h; sourceTree = "<group>"; };
-		B3325B5F17ED56BB0038D870 /* TextCollabrifyClient.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TextCollabrifyClient.mm; sourceTree = "<group>"; };
+		B3325B5F17ED56BB0038D870 /* TextCollabrifyClient.mm */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.cpp.objcpp; path = TextCollabrifyClient.mm; sourceTree = "<group>"; tabWidth = 2; };
 		B3325B6117ED725E0038D870 /* SplashViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SplashViewController.h; sourceTree = "<group>"; };
 		B3325B6217ED725F0038D870 /* SplashViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SplashViewController.m; sourceTree = "<group>"; };
 		B3709DD417E146C300FAEE34 /* WeWrite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeWrite.app; sourceTree = BUILT_PRODUCTS_DIR; };

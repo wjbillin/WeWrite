@@ -263,9 +263,9 @@ int lastSelectedLocation = 0;
 - (void)renderIncomingEdits {
   NSLog(@"TIME TO RENDER THE NEW EVENTS");
   
-  ServerTextAction *a = nil;
+  LocalTextAction *a = nil;
   while ((a = [self.incomingEdits popQueue])) {
-    NSLog(@"user: %ld, text: %@, type: %@", (long)a.user, a.text, (a.editType) ? @"REMOVE" : @"INSERT");
+    NSLog(@"text: %@, type: %@, location: %d", a.text, (a.editType) ? @"REMOVE" : @"INSERT", a.range.location);
   }
 }
 
