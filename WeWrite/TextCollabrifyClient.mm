@@ -147,16 +147,22 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
       
     } else {
       // this is a text add
-      [incomingTextEdits push:[self.incomingActions popQueue]];
+      ServerTextAction *serverAction = [self.incomingActions popQueue];
+      NSInteger user = serverAction.user;
+      NSNumber *loc = [self.userCursors objectForKey:@(user)];
+      int len = (serverAction.editType == REMOVE)? serverAction.text.length : 0;
+      LocalTextAction *localAction = [[LocalTextAction alloc] initWithRange:NSMakeRange(loc.intValue, len)
+                                                                       text:serverAction.text];
+      [incomingTextEdits push:localAction];
       
-      [[NSNotificationCenter defaultCenter] postNotification:[NSNotification
-                                                              notificationWithName:@"TEXT_RECEIVED"
-                                                              object:incomingTextEdits]];
     }
-    
   }
-  
   // notify TextViewDelegate with changes
+  [[NSNotificationCenter defaultCenter] postNotification:[NSNotification
+                                                          notificationWithName:@"TEXT_RECEIVED"
+                                                          object:incomingTextEdits]];
+
+
 }
 
 -(void) client:(CollabrifyClient *)client receivedEventWithOrderID:(int64_t)orderID submissionRegistrationID:(int32_t)submissionRegistrationID eventType:(NSString *)eventType data:(NSData *)data {
