@@ -64,6 +64,7 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
                       
       for(CollabrifySession *session in sessionList) {
         if ([session.sessionName isEqualToString:SESSION_NAME] && !session.sessionHasEnded) {
+          NSLog(@"Session owner is %@", session.owner.gmail);
           found = YES;
           [self joinSession:session];
         }
