@@ -29,7 +29,6 @@
 		B3709EB617E1700500FAEE34 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3709EB517E1700500FAEE34 /* SystemConfiguration.framework */; };
 		B3709EB817E1701F00FAEE34 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B3709EB717E1701F00FAEE34 /* libz.dylib */; };
 		B3709EBD17E17C7C00FAEE34 /* TextViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709EBC17E17C7C00FAEE34 /* TextViewDelegate.m */; };
-		B3709EBE17E17C7C00FAEE34 /* TextViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709EBC17E17C7C00FAEE34 /* TextViewDelegate.m */; };
 		B3709EC117E2749800FAEE34 /* Deque.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709EC017E2749800FAEE34 /* Deque.m */; };
 		B3709EC217E2749800FAEE34 /* Deque.m in Sources */ = {isa = PBXBuildFile; fileRef = B3709EC017E2749800FAEE34 /* Deque.m */; };
 		B38B664817EDBB4800DDA8EF /* libstdc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B38B664717EDBB4800DDA8EF /* libstdc++.dylib */; };
@@ -351,7 +350,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B3709E0C17E146C300FAEE34 /* WeWriteTests.m in Sources */,
-				B3709EBE17E17C7C00FAEE34 /* TextViewDelegate.m in Sources */,
 				B3709EC217E2749800FAEE34 /* Deque.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

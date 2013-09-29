@@ -24,5 +24,6 @@
 - (id)init;
 - (void)findSession;
 - (void)sendTextActions:(Deque *)finalEdits;
+- (void)sendCursorMove: (NSUInteger)location;
 
 @end

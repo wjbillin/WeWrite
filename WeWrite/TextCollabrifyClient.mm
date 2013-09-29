@@ -135,6 +135,26 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
   }
 }
 
+- (void)sendCursorMove: (NSUInteger)location {
+  CursorUpdate *cursorUpdate = new CursorUpdate();
+  cursorUpdate->set_position(location);
+  cursorUpdate->set_user(self.client.participantID);
+  
+  // Serialize the proto.
+  int size = cursorUpdate->ByteSize();
+  void* buffer = malloc(size);
+  cursorUpdate->SerializeToArray(buffer, size);
+  
+  // Broadcast the proto.
+  int submissionID =
+    [self.client broadcast:[NSData dataWithBytes:buffer length:size] eventType:CURSOR_EVENT];
+  
+  if (submissionID == -1) {
+    NSLog(@"Error broadcasting. Aborting call.");
+    return;
+  }
+}
+
 - (void)receiveActions {
   
   // record cursor movements
@@ -161,9 +181,8 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
   [[NSNotificationCenter defaultCenter] postNotification:[NSNotification
                                                           notificationWithName:@"TEXT_RECEIVED"
                                                           object:nil]];
-
-
 }
+
 
 -(void) client:(CollabrifyClient *)client receivedEventWithOrderID:(int64_t)orderID submissionRegistrationID:(int32_t)submissionRegistrationID eventType:(NSString *)eventType data:(NSData *)data {
   
@@ -174,7 +193,7 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
     
     CursorAction *action = [[CursorAction alloc] initWithPosition:cu->position() user:cu->user()];
     
-    NSLog(@"user: %lld, position: %d", cu->user(), cu->position());
+    NSLog(@"rec'd cursor move from user: %lld, position: %d", cu->user(), cu->position());
     
     [self.incomingActions push:action];
     
