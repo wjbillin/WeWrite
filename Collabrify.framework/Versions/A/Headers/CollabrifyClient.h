@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Collabrify/handlers.h>
 
 //Used when creating a session. Pass NSNumber indicating a limit (default 0)
 extern NSString *const CollabrifyOptionsParticipantLimitKey;

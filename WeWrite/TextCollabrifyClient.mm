@@ -9,7 +9,7 @@
 #import "Actions.h"
 #import "CollabrifyClient.h"
 #import "CollabrifySession.h"
-#import "constants.h"
+#import "Constants.h"
 #import "Deque.h"
 #import "froto/text.pb.h"
 #import "TextCollabrifyClient.h"
@@ -18,7 +18,7 @@
 
 @end
 
-NSString* SESSION_NAME = @"SOMESECRETKEY";
+NSString* SESSION_NAME = @"stupidhashthatmeansnothine34";
 NSString* TEXT_EVENT = @"TEXT_EVENT";
 NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 
@@ -49,8 +49,8 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
     _userCursors = [[NSMutableDictionary alloc] init];
     _incomingActions = [[Deque alloc] init];
     
-    [[self client] setDelegate:self];
-    [[self client] setDataSource:self];
+    [self.client setDelegate:self];
+    [self.client setDataSource:self];
   }
   
   return self;
@@ -58,12 +58,12 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 
 - (void)findSession {
   // Check if our session already exists, either join the session or create one.
-  [[self client] listSessionsWithTags:@[@"eecs441"]
+  [[self client] listSessionsWithTags:@[ @"eecs441" ]
                     completionHandler:^(NSArray *sessionList, CollabrifyError *error) {
       BOOL found = NO;
                       
       for(CollabrifySession *session in sessionList) {
-        if ([session.sessionName isEqualToString:SESSION_NAME]) {
+        if ([session.sessionName isEqualToString:SESSION_NAME] && !session.sessionHasEnded) {
           found = YES;
           [self joinSession:session];
         }
@@ -98,12 +98,22 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 
 - (void)createSession {
   [self.client createSessionWithName:SESSION_NAME
-                                tags: @[@"eecs441"]
+                                tags: @[ @"eecs441" ]
                             password:nil
                          startPaused:NO
                    completionHandler:^(int64_t sessionID, CollabrifyError *error) {
                      [self notifySession:error];
                    }];
+}
+
+- (void)deleteSession {
+  [self.client leaveAndDeleteSession:YES completionHandler:^(BOOL success, CollabrifyError *error) {
+    if (!success) {
+      NSLog(@"Failed to delete session!");
+    } else {
+      NSLog(@"Deleted session.");
+    }
+  }];
 }
 
 - (void)sendTextActions:(Deque *)finalEdits {

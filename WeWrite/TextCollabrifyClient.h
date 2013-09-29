@@ -22,6 +22,7 @@
 
 - (id)init;
 - (void)findSession;
+- (void)deleteSession;
 - (void)sendTextActions:(Deque *)finalEdits;
 
 @end

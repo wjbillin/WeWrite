@@ -7,7 +7,7 @@
 //
 
 #import "Actions.h"
-#import "constants.h"
+#import "Constants.h"
 #import "Deque.h"
 #import "TextCollabrifyClient.h"
 #import "TextViewDelegate.h"
@@ -38,11 +38,11 @@ int lastSelectedLocation = 0;
     shouldChangeTextInRange:(NSRange)range
             replacementText:(NSString *)text {
   
-  NSLog(@"Delegate called, location: %d, length: %d, selected location: %d, text is [%@]",
+  /*NSLog(@"Delegate called, location: %d, length: %d, selected location: %d, text is [%@]",
         range.location,
         range.length,
         textView.selectedRange.location,
-        text);
+        text);*/
   
   if (range.location == 0 && range.length == 0 && text.length == 0) {
     // User is backspacing at the beginning of the document. Don't bother recording anything.
@@ -111,7 +111,7 @@ int lastSelectedLocation = 0;
 }
 
 - (void)textViewDidChangeSelection:(UITextView *)textView {
-  NSLog(@"text view did change selection, location: %d", textView.selectedRange.location);
+  //NSLog(@"text view did change selection, location: %d", textView.selectedRange.location);
   if (selectionChangeFromInput || textView.selectedRange.location == lastSelectedLocation) {
     selectionChangeFromInput = NO;
   } else {
@@ -261,11 +261,18 @@ int lastSelectedLocation = 0;
 - (void)renderIncomingEdits:(NSNotification *)notification textView:(UITextView *)textView {
   NSLog(@"TIME TO RENDER THE NEW EVENTS");
   Deque *incomingEdits = [[notification userInfo] objectForKey:renderTextEditsDictName];
+  
+  @try {
     
   LocalTextAction *action;
   while ((action = [incomingEdits popQueue])) {
-    NSLog(@"text: %@, type: %@, location: %d", action.text, (action.editType) ? @"REMOVE" : @"INSERT", action.range.location);
+    NSLog(@"text: %@, type: %@, location: %d, length: %d",
+          action.text,
+          (action.editType) ? @"REMOVE" : @"INSERT",
+          action.range.location,
+          action.range.length);
     
+    /*
     int location = action.range.location;
     int length = action.range.length;
     if (action.editType == INSERT) {
@@ -277,10 +284,17 @@ int lastSelectedLocation = 0;
       self.globalTruthText = [NSString stringWithFormat:@"%@%@",
                               [self.globalTruthText substringToIndex:location],
                               [self.globalTruthText substringFromIndex:(location + length)]];
-    }
+    }*/
   }
-  
-  [textView setText:self.globalTruthText];
+    
+  /*dispatch_async(dispatch_get_main_queue(), ^{
+    [textView setText:self.globalTruthText];
+  });*/
+    
+  } @catch (NSException *exception) {
+    NSLog(@" *** Exception thrown *** - \n %@", exception.reason);
+    [[TextCollabrifyClient sharedClient] deleteSession];
+  }
 }
 
 
