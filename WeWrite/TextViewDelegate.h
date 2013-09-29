@@ -21,8 +21,11 @@
 @property (nonatomic, retain) Deque *currentEdit;
 @property (nonatomic, retain) NSTimer *timer;
 
+@property (nonatomic, retain) NSString* globalTruthText;
+
 - (id)init;
 - (void)mergeCurrentEdit;
+- (void)renderIncomingEdits:(NSNotification *)notification textView:(UITextView *)textView;
 - (void)undo:(UITextView *)textView;
 - (void)redo:(UITextView *)textView;
 

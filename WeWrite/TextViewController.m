@@ -6,6 +6,7 @@
 //  Copyright (c) 2013 William Joshua Billingham. All rights reserved.
 //
 
+#import "constants.h"
 #import "TextViewController.h"
 #import "TextViewDelegate.h"
 
@@ -26,7 +27,12 @@
     _undoButton = [[UIButton alloc] init];
     _redoButton = [[UIButton alloc] init];
   }
-    
+  
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(renderIncomingEdits:)
+                                               name:renderTextEditsNotificationName
+                                             object:nil];
+  
   return self;
 }
 
@@ -61,6 +67,10 @@
   [self.textView setDelegate:self.delegate];
   
   [self.view addSubview:self.textView];
+}
+
+- (void)renderIncomingEdits:(NSNotification *)notification {
+  [self.delegate renderIncomingEdits:notification textView:self.textView];
 }
 
 - (void)undo {
