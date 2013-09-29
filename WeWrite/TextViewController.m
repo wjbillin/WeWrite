@@ -6,7 +6,6 @@
 //  Copyright (c) 2013 William Joshua Billingham. All rights reserved.
 //
 
-#import "TextCollabrifyClient.h"
 #import "TextViewController.h"
 #import "TextViewDelegate.h"
 
