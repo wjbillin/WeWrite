@@ -6,10 +6,11 @@
 //  Copyright (c) 2013 William Joshua Billingham. All rights reserved.
 //
 
-#import "Deque.h"
-#import "TextViewDelegate.h"
 #import "Actions.h"
+#import "constants.h"
+#import "Deque.h"
 #import "TextCollabrifyClient.h"
+#import "TextViewDelegate.h"
 
 BOOL selectionChangeFromInput = NO;
 int lastSelectedLocation = 0;
@@ -27,12 +28,8 @@ int lastSelectedLocation = 0;
     _undoStack = [[Deque alloc] init];
     _currentEdit = [[Deque alloc] init];
     _timer = [[NSTimer alloc] init];
+    _globalTruthText = @"";
   }
-  
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(renderIncomingEdits)
-                                               name:@"TEXT_RECEIVED"
-                                             object:nil];
 
   return self;
 }
@@ -169,7 +166,7 @@ int lastSelectedLocation = 0;
 // Merge a series of single edits (i.e. (INSERT, {0,0}, 'h'), (INSERT, {1,0}, 'i')) into a series of merged
 // edits (i.e. (INSERT, {0,0}, 'hi')). However, this function makes no effort to resolve these 'merged
 // edits' (i.e. (INSERT, {0,0}, 'here'), (DELETE, {2,2}, 're'), (INSERT, {2,0}, 'm') is NOT resolved to the
-// single edit (INSERT, {0,0}, 'hem'), although it is semantically correct to do so. For that functionality,
+// single edit (INSERT, {0,0}, 'hem'), although it is semantically correct to do so. For thatfunctionality,
 // please see resolveMergedEdits.
 - (Deque *)mergeSingleEdits {
   LocalTextAction *singleEdit;
@@ -264,14 +261,30 @@ int lastSelectedLocation = 0;
   return finalEdits;
 }
 
-- (void)renderIncomingEdits {
+// We've received other people's changes. Insert them into the text view.
+- (void)renderIncomingEdits:(NSNotification *)notification textView:(UITextView *)textView {
   NSLog(@"TIME TO RENDER THE NEW EVENTS");
-  Deque *incomingEdits = [[TextCollabrifyClient sharedClient] finishedTextEdits];
+  Deque *incomingEdits = [[notification userInfo] objectForKey:renderTextEditsDictName];
     
-  LocalTextAction *a = nil;
-  while ((a = [incomingEdits popQueue])) {
-    NSLog(@"text: %@, type: %@, location: %d", a.text, (a.editType) ? @"REMOVE" : @"INSERT", a.range.location);
+  LocalTextAction *action;
+  while ((action = [incomingEdits popQueue])) {
+    NSLog(@"text: %@, type: %@, location: %d", action.text, (action.editType) ? @"REMOVE" : @"INSERT", action.range.location);
+    
+    int location = action.range.location;
+    int length = action.range.length;
+    if (action.editType == INSERT) {
+      self.globalTruthText = [NSString stringWithFormat:@"%@%@%@",
+                              [self.globalTruthText substringToIndex:location],
+                              action.text,
+                              [self.globalTruthText substringFromIndex:location]];
+    } else {
+      self.globalTruthText = [NSString stringWithFormat:@"%@%@",
+                              [self.globalTruthText substringToIndex:location],
+                              [self.globalTruthText substringFromIndex:(location + length)]];
+    }
   }
+  
+  [textView setText:self.globalTruthText];
 }
 
 

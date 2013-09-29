@@ -6,13 +6,13 @@
 //  Copyright (c) 2013 William Joshua Billingham. All rights reserved.
 //
 
-#import "TextViewController.h"
-#import "TextCollabrifyClient.h"
+#import "Actions.h"
 #import "CollabrifyClient.h"
 #import "CollabrifySession.h"
-#import "froto/text.pb.h"
-#import "Actions.h"
+#import "constants.h"
 #import "Deque.h"
+#import "froto/text.pb.h"
+#import "TextCollabrifyClient.h"
 
 @interface TextCollabrifyClient () <CollabrifyClientDelegate, CollabrifyClientDataSource>
 
@@ -48,7 +48,6 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
   
     _userCursors = [[NSMutableDictionary alloc] init];
     _incomingActions = [[Deque alloc] init];
-    _finishedTextEdits = [[Deque alloc] init];
     
     [[self client] setDelegate:self];
     [[self client] setDataSource:self];
@@ -156,6 +155,7 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 }
 
 - (void)receiveActions {
+  Deque *finishedTextEdits = [[Deque alloc] init];
   
   // record cursor movements
   while ([self.incomingActions size] != 0) {
@@ -167,14 +167,25 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
       
     } else {
       // this is a text add
-      ServerTextAction *serverAction = [self.incomingActions popQueue];
-      NSInteger user = serverAction.user;
-      NSNumber *loc = [self.userCursors objectForKey:@(user)];
-      int len = (serverAction.editType == REMOVE)? serverAction.text.length : 0;
-      LocalTextAction *localAction = [[LocalTextAction alloc] initWithRange:NSMakeRange(loc.intValue, len)
-                                                                       text:serverAction.text];
-      [self.finishedTextEdits push:localAction];
       
+      // Figure out the location/length of this text edit.
+      ServerTextAction *serverAction = [self.incomingActions popQueue];
+      NSNumber *user = [NSNumber numberWithInteger:serverAction.user];
+      NSNumber *loc = [self.userCursors objectForKey:user];
+      
+      int location = loc.intValue;
+      int length = (serverAction.editType == REMOVE) ? serverAction.text.length : 0;
+      LocalTextAction *localAction = [[LocalTextAction alloc] initWithRange:NSMakeRange(location, length)
+                                                                       text:serverAction.text];
+      
+      // Update the user's cursor appropriately.
+      if (serverAction.editType == INSERT) {
+        [self.userCursors setObject:[NSNumber numberWithInt:(location + length)] forKey:user];
+      } else {
+        [self.userCursors setObject:[NSNumber numberWithInt:(location - length)] forKey:user];
+      }
+      
+      [finishedTextEdits push:localAction];
     }
   }
   // notify TextViewDelegate with changes

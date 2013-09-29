@@ -17,7 +17,6 @@
 @property (nonatomic, retain) NSMutableDictionary *unconfirmedActions;
 @property (nonatomic, retain) Deque *incomingActions;
 @property (nonatomic, retain) NSMutableDictionary *userCursors;
-@property (nonatomic, retain) Deque *finishedTextEdits;
 
 + (id)sharedClient;
 
