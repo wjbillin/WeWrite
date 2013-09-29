@@ -276,7 +276,6 @@ int lastSelectedLocation = 0;
           action.range.location,
           action.range.length);
     
-    /*
     int location = action.range.location;
     int length = action.range.length;
     if (action.editType == INSERT) {
@@ -288,7 +287,7 @@ int lastSelectedLocation = 0;
       self.globalTruthText = [NSString stringWithFormat:@"%@%@",
                               [self.globalTruthText substringToIndex:location],
                               [self.globalTruthText substringFromIndex:(location + length)]];
-    }*/
+    }
   }
     
   /*dispatch_async(dispatch_get_main_queue(), ^{

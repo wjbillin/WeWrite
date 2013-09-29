@@ -18,7 +18,7 @@
 
 @end
 
-NSString* SESSION_NAME = @"stupidhashthatmeansnothine34";
+NSString* SESSION_NAME = @"bfdksjlafldfbdkslfjkjk";
 NSString* TEXT_EVENT = @"TEXT_EVENT";
 NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 
