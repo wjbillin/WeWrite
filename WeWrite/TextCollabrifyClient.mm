@@ -190,8 +190,14 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
       
       // Update the user's cursor appropriately.
       if (serverAction.editType == INSERT) {
-        [self.userCursors setObject:[NSNumber numberWithInt:(location + length)] forKey:user];
+        NSLog(@"Adjusting a users cursor for insert from %d to %d",
+              location,
+              location + serverAction.text.length);
+        
+        int textLength = serverAction.text.length;
+        [self.userCursors setObject:[NSNumber numberWithInt:(location + textLength)] forKey:user];
       } else {
+        NSLog(@"Adjusting a users cursor for remove from %d to %d", location, location - length);
         [self.userCursors setObject:[NSNumber numberWithInt:(location - length)] forKey:user];
       }
       
