@@ -188,10 +188,16 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
       [finishedTextEdits push:localAction];
     }
   }
-  // notify TextViewDelegate with changes
-  [[NSNotificationCenter defaultCenter] postNotification:[NSNotification
-                                                          notificationWithName:@"TEXT_RECEIVED"
-                                                          object:nil]];
+  
+  // Create a dictionary to hold the finished edits.
+  NSDictionary *dict = [[NSDictionary alloc] initWithObjects:@[ finishedTextEdits ]
+                                                     forKeys:@[ renderTextEditsDictName ]];
+  
+  // Notify the text delegate that there are text edits to render.
+  [[NSNotificationCenter defaultCenter]
+      postNotification:[NSNotification notificationWithName:renderTextEditsNotificationName
+                                                     object:nil
+                                                   userInfo:dict]];
 }
 
 
