@@ -290,9 +290,9 @@ int lastSelectedLocation = 0;
     }
   }
     
-  /*dispatch_async(dispatch_get_main_queue(), ^{
+  dispatch_async(dispatch_get_main_queue(), ^{
     [textView setText:self.globalTruthText];
-  });*/
+  });
     
   } @catch (NSException *exception) {
     NSLog(@" *** Exception thrown *** - \n %@", exception.reason);
