@@ -173,6 +173,7 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
       // this is a cursor movement
       CursorAction *cursor = [self.incomingActions popQueue];
       
+      NSLog(@"Moving user %d to position %d.", cursor.user, cursor.position);
       [self.userCursors setObject:@(cursor.position) forKey:@(cursor.user)];
       
     } else {
