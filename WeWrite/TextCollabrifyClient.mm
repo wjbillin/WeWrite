@@ -47,6 +47,8 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
                                                 error:&err];
   
     _userCursors = [[NSMutableDictionary alloc] init];
+    _incomingActions = [[Deque alloc] init];
+    _finishedTextEdits = [[Deque alloc] init];
     
     [[self client] setDelegate:self];
     [[self client] setDataSource:self];
@@ -135,8 +137,6 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 
 - (void)receiveActions {
   
-  Deque *incomingTextEdits = [[Deque alloc] init];
-  
   // record cursor movements
   while ([self.incomingActions size] != 0) {
     if([[self.incomingActions front] isKindOfClass:CursorAction.class]) {
@@ -153,14 +153,14 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
       int len = (serverAction.editType == REMOVE)? serverAction.text.length : 0;
       LocalTextAction *localAction = [[LocalTextAction alloc] initWithRange:NSMakeRange(loc.intValue, len)
                                                                        text:serverAction.text];
-      [incomingTextEdits push:localAction];
+      [self.finishedTextEdits push:localAction];
       
     }
   }
   // notify TextViewDelegate with changes
   [[NSNotificationCenter defaultCenter] postNotification:[NSNotification
                                                           notificationWithName:@"TEXT_RECEIVED"
-                                                          object:incomingTextEdits]];
+                                                          object:nil]];
 
 
 }
