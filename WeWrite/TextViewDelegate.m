@@ -32,7 +32,7 @@ int lastSelectedLocation = 0;
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(renderIncomingEdits)
                                                name:@"TEXT_RECEIVED"
-                                             object:self.incomingEdits];
+                                             object:nil];
 
   return self;
 }
@@ -262,9 +262,10 @@ int lastSelectedLocation = 0;
 
 - (void)renderIncomingEdits {
   NSLog(@"TIME TO RENDER THE NEW EVENTS");
-  
+  Deque *incomingEdits = [[TextCollabrifyClient sharedClient] finishedTextEdits];
+    
   LocalTextAction *a = nil;
-  while ((a = [self.incomingEdits popQueue])) {
+  while ((a = [incomingEdits popQueue])) {
     NSLog(@"text: %@, type: %@, location: %d", a.text, (a.editType) ? @"REMOVE" : @"INSERT", a.range.location);
   }
 }
