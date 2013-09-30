@@ -31,15 +31,29 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+
+  [self.view setBackgroundColor:[UIColor orangeColor]];
   
-  NSLog(@"inside view did load");
-  [self.joinButton setFrame:CGRectMake(40, 40, 100, 50)];
-  [self.joinButton setTitle:@"Hello" forState:UIControlStateNormal];
+  self.joinButton = [UIButton buttonWithType:UIButtonTypeSystem];
+  [self.joinButton setFrame:CGRectMake(0, 0, 200, 50)];
+  
+  CGRect bounds = [self.view bounds];
+  [self.joinButton setCenter:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 30)];
+  [self.joinButton setTitle:@"start" forState:UIControlStateNormal];
   [self.joinButton addTarget:self
                       action:@selector(joinSession)
             forControlEvents:UIControlEventTouchUpInside];
 
   [self.view addSubview:self.joinButton];
+  
+  CGRect screen = [[UIScreen mainScreen] bounds];
+  UILabel *title = [[UILabel alloc] initWithFrame:screen];
+  [title setTextAlignment:NSTextAlignmentCenter];
+  [title setFont:[UIFont fontWithName:@"Helvetica" size:48]];
+  [title setText:@"edit"];
+  [title setCenter:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 100)];
+  
+  [self.view addSubview:title];
 }
 
 - (void)addSpinny {
