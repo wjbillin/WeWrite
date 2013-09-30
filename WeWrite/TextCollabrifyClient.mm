@@ -18,9 +18,8 @@
 
 @end
 
-NSString* SESSION_NAME = @"bfdksjlafldfbdkslfjkjo";
-NSString* TEXT_EVENT = @"TEXT_EVENT";
-NSString* CURSOR_EVENT = @"CURSOR_EVENT";
+NSString* SESSION_NAME = @"bfdksjlafldfbdkslfjkjt";
+NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
 
 @implementation TextCollabrifyClient
 
@@ -117,47 +116,37 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
   }];
 }
 
-- (void)sendTextActions:(Deque *)finalEdits {
-  NSLog(@"The text did change. %d edits.", finalEdits.size);
+- (void)sendActions:(Deque *)localActions {
+  NSLog(@"The text did change. %d edits.", localActions.size);
   
-  LocalTextAction* action;
-  while ((action = [finalEdits popQueue])) {
-    TextUpdate* textUpdate = new TextUpdate();
-    textUpdate->set_user(self.client.participantID);
-    textUpdate->set_type(
-        (action.editType == INSERT) ? TextUpdate_ChangeType_INSERT : TextUpdate_ChangeType_REMOVE);
-    textUpdate->set_text([action.text cStringUsingEncoding:[NSString defaultCStringEncoding]]);
+  id action;
+  EditSeries *editSeries = new EditSeries();
+  editSeries->set_user(self.client.participantID);
+  
+  while ((action = [localActions popQueue])) {
+    Edit* edit = editSeries->add_edits();
     
-    // Serialize the proto.
-    int size = textUpdate->ByteSize();
-    void* buffer = malloc(size);
-    textUpdate->SerializeToArray(buffer, size);
-    
-    // Broadcast the proto.
-    int submissionID =
-        [self.client broadcast:[NSData dataWithBytes:buffer length:size] eventType:TEXT_EVENT];
-    
-    if (submissionID == -1) {
-      NSLog(@"Error broadcasting. Aborting call.");
-      return;
+    // Check if action is a cursor position change or a text action.
+    if ([action isKindOfClass:[TextAction class]]) {
+      TextAction *textAction = action;
+      edit->set_type(
+        (textAction.editType == INSERT) ? Edit_ChangeType_INSERT : Edit_ChangeType_REMOVE);
+      edit->set_text([textAction.text cStringUsingEncoding:[NSString defaultCStringEncoding]]);
+    } else {
+      CursorAction *cursorAction = action;
+      edit->set_type(Edit_ChangeType_CURSOR);
+      edit->set_location(cursorAction.position);
     }
-    [self.unconfirmedActions setObject:action forKey:[NSString stringWithFormat:@"%d", submissionID]];
   }
-}
-
-- (void)sendCursorMove:(NSUInteger)location {
-  CursorUpdate *cursorUpdate = new CursorUpdate();
-  cursorUpdate->set_position(location);
-  cursorUpdate->set_user(self.client.participantID);
   
   // Serialize the proto.
-  int size = cursorUpdate->ByteSize();
-  void* buffer = malloc(size);
-  cursorUpdate->SerializeToArray(buffer, size);
-  
+  int size = editSeries->ByteSize();
+  void* bytes = malloc(size);
+  editSeries->SerializeToArray(bytes, size);
+    
   // Broadcast the proto.
   int submissionID =
-    [self.client broadcast:[NSData dataWithBytes:buffer length:size] eventType:CURSOR_EVENT];
+      [self.client broadcast:[NSData dataWithBytes:bytes length:size] eventType:EDIT_SERIES_EVENT];
   
   if (submissionID == -1) {
     NSLog(@"Error broadcasting. Aborting call.");
@@ -166,52 +155,52 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 }
 
 - (void)receiveActions {
-  Deque *finishedTextEdits = [[Deque alloc] init];
+  Deque *finishedUpdates = [[Deque alloc] init];
   
   while ([self.incomingActions size] != 0) {
     if([[self.incomingActions front] isKindOfClass:CursorAction.class]) {
       // This is a cursor movement.
-      CursorAction *cursor = [self.incomingActions popQueue];
+      CursorAction *cursorAction = [self.incomingActions popQueue];
       
-      NSLog(@"Moving user %d to position %d.", cursor.user, cursor.position);
-      [self.userCursors setObject:@(cursor.position) forKey:@(cursor.user)];
-      
+      [finishedUpdates push:cursorAction];
     } else {
-      // Text action.
-      
-      // Figure out the location/length of this text edit.
-      ServerTextAction *serverAction = [self.incomingActions popQueue];
-      NSNumber *user = [NSNumber numberWithInteger:serverAction.user];
+      // Text action. Figure out the location/length of this text edit.
+      TextAction *textAction = [self.incomingActions popQueue];
+
+      NSNumber *user = [NSNumber numberWithInteger:textAction.user];
       NSNumber *loc = [self.userCursors objectForKey:user];
       
       int location = loc.intValue;
-      int length = (serverAction.editType == REMOVE) ? serverAction.text.length : 0;
-      LocalTextAction *localAction = [[LocalTextAction alloc] initWithRange:NSMakeRange(location, length)
-                                                                       text:serverAction.text];
-      [self updateCursors:localAction];
+      int length = (textAction.editType == REMOVE) ? textAction.text.length : 0;
+      textAction.range = NSMakeRange(location, length);
       
-      [finishedTextEdits push:localAction];
+      [self updateCursors:textAction];
+      
+      [finishedUpdates push:textAction];
     }
   }
   
   // Create a dictionary to hold the finished edits.
-  NSDictionary *dict = [[NSDictionary alloc] initWithObjects:@[ finishedTextEdits ]
-                                                     forKeys:@[ renderTextEditsDictName ]];
+  NSDictionary *dict = [[NSDictionary alloc] initWithObjects:@[ finishedUpdates ]
+                                                     forKeys:@[ renderUpdatesDictName ]];
   
   // Notify the text delegate that there are text edits to render.
   [[NSNotificationCenter defaultCenter]
-      postNotification:[NSNotification notificationWithName:renderTextEditsNotificationName
+      postNotification:[NSNotification notificationWithName:renderUpdatesNotificationName
                                                      object:nil
                                                    userInfo:dict]];
 }
 
 // Loop through the cursors and update the positions based on the text action.
-- (void)updateCursors:(LocalTextAction *)textAction {
+- (void)updateCursors:(TextAction *)textAction {
   int leftIndex = textAction.range.location - textAction.range.length;
   int rightIndex = (textAction.editType == REMOVE) ?
       textAction.range.location : textAction.range.location + textAction.text.length;
   
-  for (NSNumber* __strong location in self.userCursors) {
+  for (id key in [self.userCursors allKeys]) {
+    NSNumber* location = [self.userCursors objectForKey:key];
+    NSLog(@"cursor location is %d, action location: %d, length: %d, text: [%@]",
+          location.intValue, textAction.range.location, textAction.range.length, textAction.text);
     if (textAction.editType == REMOVE) {
       if (location.intValue > rightIndex) {
         location = [NSNumber numberWithInt:(location.intValue - textAction.range.length)];
@@ -223,42 +212,36 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
         location = [NSNumber numberWithInt:(location.intValue + textAction.text.length)];
       }
     }
+    
+    [self.userCursors setObject:location forKey:key];
   }
 }
 
 
 - (void) client:(CollabrifyClient *)client receivedEventWithOrderID:(int64_t)orderID submissionRegistrationID:(int32_t)submissionRegistrationID eventType:(NSString *)eventType data:(NSData *)data {
   
-  if([eventType isEqualToString:CURSOR_EVENT]) {
-    // cursor change
-    CursorUpdate *cu = new CursorUpdate();
-    cu->ParseFromArray([data bytes], data.length);
+  EditSeries *editSeries = new EditSeries();
+  editSeries->ParseFromArray([data bytes], data.length);
+  
+  for (int i = 0; i < editSeries->edits_size(); ++i) {
+    const ::Edit edit = editSeries->edits(i);
     
-    CursorAction *action = [[CursorAction alloc] initWithPosition:cu->position() user:cu->user()];
-    
-    NSLog(@"rec'd cursor move from user: %lld, position: %d", cu->user(), cu->position());
-    
-    [self.incomingActions push:action];
-    
-  } else if ([eventType isEqualToString:TEXT_EVENT]) {
-    // text change
-    TextUpdate *tc = new TextUpdate();
-    tc->ParseFromArray([data bytes], data.length);
-    
-    NSString* textString = [NSString stringWithCString:tc->text().c_str()
-                                              encoding:[NSString defaultCStringEncoding]];
-    EditType editType = (tc->type() == TextUpdate_ChangeType_INSERT) ? INSERT : REMOVE;
-    ServerTextAction *action =
-        [[ServerTextAction alloc] initWithServerUpdate:tc->user()
-                                                  text:textString
-                                              editType:editType];
-    
-    //NSLog(@"user: %lld, text: %s, type: %d", tc->user(), tc->text().c_str(), tc->type());
-        
-    [self.incomingActions push:action];
+    if (edit.type() == Edit_ChangeType_CURSOR) {
+      CursorAction *cursorAction =
+          [[CursorAction alloc] initWithPosition:edit.location() user:editSeries->user()];
+      
+      [self.incomingActions push:cursorAction];
+    } else {
+      EditType type = (edit.type() == Edit_ChangeType_INSERT) ? INSERT : REMOVE;
+      NSString* text = [NSString stringWithCString:edit.text().c_str() encoding:NSASCIIStringEncoding];
+      TextAction *textAction =
+          [[TextAction alloc] initWithUser:editSeries->user() text:text editType:type];
+      
+      [self.incomingActions push:textAction];
+    }
   }
   
-  // ingest and rectify the actions
+  // Actually process the actions. Yay!
   [self receiveActions];
   
 }

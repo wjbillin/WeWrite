@@ -14,7 +14,6 @@
 @interface TextCollabrifyClient : NSObject
 
 @property (nonatomic, retain) CollabrifyClient* client;
-@property (nonatomic, retain) NSMutableDictionary *unconfirmedActions;
 @property (nonatomic, retain) Deque *incomingActions;
 @property (nonatomic, retain) NSMutableDictionary *userCursors;
 
@@ -23,7 +22,6 @@
 - (id)init;
 - (void)findSession;
 - (void)deleteSession;
-- (void)sendTextActions:(Deque *)finalEdits;
-- (void)sendCursorMove: (NSUInteger)location;
+- (void)sendActions:(Deque *)finalEdits;
 
 @end

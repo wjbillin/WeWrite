@@ -1,14 +1,19 @@
-message CursorUpdate {
-  required int64 user = 1;
-  required int32 position = 2;
-}
-
-message TextUpdate {
-  required int64 user = 1;
+message Edit {
   enum ChangeType {
     INSERT = 0;
     REMOVE = 1;
+    CURSOR = 2;
   }
-  required ChangeType type = 2;
-  required string text = 3;
+  required ChangeType type = 1;
+
+ // Only for text actions (remove/delete).
+  optional string text = 2;
+  
+ // Only for cursor position changes.
+  optional int32 location = 3;
+}
+
+message EditSeries {
+  required int64 user = 1;
+  repeated Edit edits = 2;
 }

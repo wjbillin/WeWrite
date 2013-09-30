@@ -8,5 +8,5 @@
 
 #import "Constants.h"
 
-NSString *renderTextEditsDictName = @"EDITS_DICT";
-NSString *renderTextEditsNotificationName = @"renderTextEdits";
+NSString *renderUpdatesDictName = @"EDITS_DICT";
+NSString *renderUpdatesNotificationName = @"renderTextEdits";

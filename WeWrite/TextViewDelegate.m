@@ -28,7 +28,7 @@ int lastSelectedLocation = 0;
     _undoStack = [[Deque alloc] init];
     _currentEdit = [[Deque alloc] init];
     _timer = [[NSTimer alloc] init];
-    _globalTruthText = @"";
+    _globalTruthText = [NSMutableString stringWithString:@""];
   }
 
   return self;
@@ -52,20 +52,20 @@ int lastSelectedLocation = 0;
   if (range.length > 0 && text.length == 0) {
     // This action is a delete. Find out what characters were deleted.
     NSString *deletedText = [textView.text substringWithRange:range];
-    [self.currentEdit push:[[LocalTextAction alloc] initWithRange:range text:deletedText]];
+    [self.currentEdit push:[[TextAction alloc] initWithRange:range text:deletedText]];
   } else if (range.length > 0 && text.length > 0) {
     // This action is an autocomplete/correct. Split it up into a remove and an addition.
     NSString* deletedText = [textView.text substringWithRange:range];
     
     // Push on the remove.
-    [self.currentEdit push:[[LocalTextAction alloc] initWithRange:range text:deletedText]];
+    [self.currentEdit push:[[TextAction alloc] initWithRange:range text:deletedText]];
     
     // Push on the add.
-    [self.currentEdit push:[[LocalTextAction alloc] initWithRange:NSMakeRange(range.location, 0)
+    [self.currentEdit push:[[TextAction alloc] initWithRange:NSMakeRange(range.location, 0)
                                                              text:text]];
   } else {
     // This action is an add.
-    [self.currentEdit push:[[LocalTextAction alloc] initWithRange:range text:text]];
+    [self.currentEdit push:[[TextAction alloc] initWithRange:range text:text]];
   }
   
   // If the timer is currently running, we want to stop it before scheduling it again.
@@ -85,7 +85,7 @@ int lastSelectedLocation = 0;
 - (void)textViewDidChange:(UITextView *)textView {
   //NSLog(@"TextViewDidChange callback, selected position: %d", textView.selectedRange.location);
   
-  LocalTextAction *lastAction = [self.currentEdit front];
+  TextAction *lastAction = [self.currentEdit front];
   NSUInteger currentCursor = textView.selectedRange.location;
   
   if (lastAction && lastAction.range.length > 0 && currentCursor == (lastAction.range.location - 1)) {
@@ -118,9 +118,11 @@ int lastSelectedLocation = 0;
   } else {
     NSLog(@"invalidating timer from cursor change");
     
-    // This broadcasts right away. See if we can't send this as part of the same move as the built
-    // up text actions.
-    [[TextCollabrifyClient sharedClient] sendCursorMove:textView.selectedRange.location];
+    // Push cursor movement onto current edit. Bogus user since this is a local change - we'll set
+    // the user right before we sent this series of actions.
+    CursorAction *cursorAction = [[CursorAction alloc] initWithPosition:textView.selectedRange.location
+                                                                   user:-1];
+    [self.currentEdit push:cursorAction];
   
     if (self.timer.isValid) {
       [self.timer invalidate];
@@ -151,17 +153,17 @@ int lastSelectedLocation = 0;
   [self printQueue:finalEdits];
   
   // Deque to pass to collab client
-  Deque *editsForCollab = [[Deque alloc] init];
+  Deque *sendableUpdates = [[Deque alloc] init];
   
   // Put the actions in the undo stack.
-  LocalTextAction *curAction;
+  TextAction *curAction;
   while ((curAction = [finalEdits popQueue])) {
     [self.undoStack push:curAction];
-    [editsForCollab push:curAction];
+    [sendableUpdates push:curAction];
   }
   
   // notify collab client of changes
-  [[TextCollabrifyClient sharedClient] sendTextActions:editsForCollab];
+  [[TextCollabrifyClient sharedClient] sendActions:sendableUpdates];
 }
 
 // Merge a series of single edits (i.e. (INSERT, {0,0}, 'h'), (INSERT, {1,0}, 'i')) into a series of merged
@@ -170,25 +172,33 @@ int lastSelectedLocation = 0;
 // single edit (INSERT, {0,0}, 'hem'), although it is semantically correct to do so. For thatfunctionality,
 // please see resolveMergedEdits.
 - (Deque *)mergeSingleEdits {
-  LocalTextAction *singleEdit;
-  LocalTextAction *currentMergedEdit;
+  id singleEdit;
+  TextAction *currentMergedEdit;
   Deque *mergedEdits = [[Deque alloc] init];
 
   while ((singleEdit = [self.currentEdit popQueue])) {
-    if ([mergedEdits empty] || currentMergedEdit.editType != singleEdit.editType) {
+    if ([singleEdit isKindOfClass:[CursorAction class]]) {
+      [mergedEdits push:singleEdit];
+      continue;
+    }
+    
+    TextAction *singleTextEdit = singleEdit;
+    if ([mergedEdits empty] || currentMergedEdit.editType != singleTextEdit.editType) {
       // This is the first action or the actions are different.
       [mergedEdits push:singleEdit];
       currentMergedEdit = singleEdit;
     } else {
       // The actions are of the same type. Merge them.
-      if (singleEdit.editType == REMOVE) {
-        currentMergedEdit.range = NSMakeRange(singleEdit.range.location,
-                                              currentMergedEdit.range.length + singleEdit.range.length);
+      if (singleTextEdit.editType == REMOVE) {
+        currentMergedEdit.range =
+            NSMakeRange(singleTextEdit.range.location,
+                        currentMergedEdit.range.length + singleTextEdit.range.length);
+        
         currentMergedEdit.text = (currentMergedEdit.text) ?
-            [singleEdit.text stringByAppendingString:currentMergedEdit.text] : singleEdit.text;
-      } else if (singleEdit.editType == INSERT) {
+            [singleTextEdit.text stringByAppendingString:currentMergedEdit.text] : singleTextEdit.text;
+      } else if (singleTextEdit.editType == INSERT) {
         currentMergedEdit.text = (currentMergedEdit.text) ?
-            [currentMergedEdit.text stringByAppendingString:singleEdit.text] : singleEdit.text;
+            [currentMergedEdit.text stringByAppendingString:singleTextEdit.text] : singleTextEdit.text;
       }
     }
   }
@@ -205,23 +215,22 @@ int lastSelectedLocation = 0;
 - (Deque *)resolveMergedEdits:(Deque *)mergedEdits {
   Deque *finalEdits = [[Deque alloc] init];
   
-  LocalTextAction *lastAction = [mergedEdits back];
+  TextAction *lastAction = [mergedEdits back];
   int smallestIndex, ogCursorIndex;
   smallestIndex = ogCursorIndex = lastAction.range.location;
-  //NSLog(@"smallest index is %d", smallestIndex);
   
-  LocalTextAction *curAction = [mergedEdits popQueue];
+  TextAction *curAction = [mergedEdits popQueue];
   [finalEdits push:curAction];
   
   while ((curAction = [mergedEdits popQueue])) {
-    LocalTextAction* lastAction = [finalEdits front];
+    TextAction* lastAction = [finalEdits front];
     
     if (curAction.editType == REMOVE) {
       if (curAction.range.location < smallestIndex) {
         int netDeletionLength = ogCursorIndex - curAction.range.location;
         curAction.range = NSMakeRange(curAction.range.location, netDeletionLength);
         
-        LocalTextAction* ogDeleteAction = [finalEdits back];
+        TextAction* ogDeleteAction = [finalEdits back];
         if (ogDeleteAction.editType == REMOVE && ogDeleteAction != curAction) {
           NSLog(@"Smallest index is %d and curAction location is %d", smallestIndex, curAction.range.location);
           curAction.text =
@@ -249,15 +258,12 @@ int lastSelectedLocation = 0;
     } else if (curAction.editType == INSERT) {
       if (!lastAction || lastAction.editType == REMOVE) {
         [finalEdits push:curAction];
-        if(lastAction && [lastAction.text isEqualToString:curAction.text]) {
-          [finalEdits popStack];
-        }
+        // TODO: Optimize, if they re-type the same shit.
       } else {
         lastAction.text = [lastAction.text stringByAppendingString:curAction.text];
       }
     }
   }
-
   
   return finalEdits;
 }
@@ -265,11 +271,11 @@ int lastSelectedLocation = 0;
 // We've received other people's changes. Insert them into the text view.
 - (void)renderIncomingEdits:(NSNotification *)notification textView:(UITextView *)textView {
   NSLog(@"TIME TO RENDER THE NEW EVENTS");
-  Deque *incomingEdits = [[notification userInfo] objectForKey:renderTextEditsDictName];
+  Deque *incomingEdits = [[notification userInfo] objectForKey:renderUpdatesDictName];
   
   @try {
     
-  LocalTextAction *action;
+  TextAction *action;
   while ((action = [incomingEdits popQueue])) {
     NSLog(@"text: %@, type: %@, location: %d, length: %d",
           action.text,
@@ -280,19 +286,17 @@ int lastSelectedLocation = 0;
     int location = action.range.location;
     int length = action.range.length;
     if (action.editType == INSERT) {
-      self.globalTruthText = [NSString stringWithFormat:@"%@%@%@",
-                              [self.globalTruthText substringToIndex:location],
-                              action.text,
-                              [self.globalTruthText substringFromIndex:location]];
+      [self.globalTruthText insertString:action.text atIndex:location];
     } else {
-      self.globalTruthText = [NSString stringWithFormat:@"%@%@",
-                              [self.globalTruthText substringToIndex:(location - length)],
-                              [self.globalTruthText substringFromIndex:location]];
+      NSRange deletedCharactersRange = NSMakeRange(location - length, length);
+      [self.globalTruthText deleteCharactersInRange:deletedCharactersRange];
     }
   }
     
   dispatch_async(dispatch_get_main_queue(), ^{
-    [textView setText:self.globalTruthText];
+    NSLog(@"called dispatch async");
+    NSString* globalCopy = [NSString stringWithString:self.globalTruthText];
+    [textView setText:globalCopy];
 
     TextCollabrifyClient *textClient = [TextCollabrifyClient sharedClient];
     NSNumber* user = [NSNumber numberWithInt:textClient.client.participantID];
@@ -318,7 +322,7 @@ int lastSelectedLocation = 0;
   [self.timer invalidate];
   [self mergeCurrentEdit];
 
-  LocalTextAction *lastAction = [self.undoStack popStack];
+  TextAction *lastAction = [self.undoStack popStack];
   if (!lastAction) {
     return;
   }
@@ -336,13 +340,13 @@ int lastSelectedLocation = 0;
   selectionChangeFromInput = YES;
 }
 
-- (void)undoAdd:(LocalTextAction *)addAction textView:(UITextView *)textView {
+- (void)undoAdd:(TextAction *)addAction textView:(UITextView *)textView {
   textView.text = [NSString stringWithFormat:@"%@%@",
                    [textView.text substringToIndex:addAction.range.location],
                    [textView.text substringFromIndex:(addAction.range.location + addAction.text.length)]];
 }
 
-- (void)undoRemove:(LocalTextAction *)removeAction textView:(UITextView *)textView {
+- (void)undoRemove:(TextAction *)removeAction textView:(UITextView *)textView {
   textView.text = [NSString stringWithFormat:@"%@%@%@",
                    [textView.text substringToIndex:removeAction.range.location],
                    removeAction.text,
@@ -353,7 +357,7 @@ int lastSelectedLocation = 0;
   [self.timer invalidate];
   [self mergeCurrentEdit];
 
-  LocalTextAction *undidAction = [self.redoStack popStack];
+  TextAction *undidAction = [self.redoStack popStack];
   if (!undidAction) {
     return;
   }
@@ -370,18 +374,18 @@ int lastSelectedLocation = 0;
   [self.undoStack push:undidAction];
 }
 
-- (void)redoAdd:(LocalTextAction *)LocalTextAction textView:(UITextView *)textView {
+- (void)redoAdd:(TextAction *)textAction textView:(UITextView *)textView {
   textView.text = [NSString stringWithFormat:@"%@%@%@",
-                   [textView.text substringToIndex:LocalTextAction.range.location],
-                   LocalTextAction.text,
-                   [textView.text substringFromIndex:LocalTextAction.range.location]];
+                   [textView.text substringToIndex:textAction.range.location],
+                   textAction.text,
+                   [textView.text substringFromIndex:textAction.range.location]];
 }
 
-- (void)redoRemove:(LocalTextAction *)LocalTextAction textView:(UITextView *)textView {
+- (void)redoRemove:(TextAction *)textAction textView:(UITextView *)textView {
   textView.text = [NSString stringWithFormat:@"%@%@",
-                   [textView.text substringToIndex:LocalTextAction.range.location],
-                   [textView.text substringFromIndex:(LocalTextAction.range.location +
-                                                      LocalTextAction.range.length)]];
+                   [textView.text substringToIndex:textAction.range.location],
+                   [textView.text substringFromIndex:(textAction.range.location +
+                                                      textAction.range.length)]];
 }
 
 - (void)resetTimer {
@@ -399,7 +403,7 @@ int lastSelectedLocation = 0;
 #pragma mark Utility
 
 - (void)printQueue:(Deque *)deque {
-  LocalTextAction *action;
+  TextAction *action;
   int count = 0;
   int size = [deque size];
   

@@ -8,54 +8,6 @@
 
 #import "Actions.h"
 
-@implementation LocalTextAction
-
-- (id)init {
-  if (self = [super init]) {
-    return [self initWithRange:NSMakeRange(0, 0) text:nil];
-  }
-  
-  return self;
-}
-
-- (id)initWithAction:(LocalTextAction *)action {
-  if (self = [super init]) {
-    return [self initWithRange:action.range text:action.text];
-  }
-  
-  return self;
-}
-
-- (id)initWithRange:(NSRange)range text:(NSString *)text {
-  if (self = [super init]) {
-    _range = range;
-    _text = text;
-    _editType = [self type:range];
-  }
-  return self;
-}
-
-
-- (EditType)type:(NSRange)range{
-  return (range.length == 0) ? INSERT : REMOVE;
-}
-
-@end
-
-@implementation ServerTextAction
-
-- (id)initWithServerUpdate:(NSInteger)user text:(NSString *)text editType:(EditType)editType {
-  if (self = [super init]) {
-    _user = user;
-    _text = [NSString stringWithString:text];
-    _editType = editType;
-  }
-  
-  return self;
-}
-
-@end
-
 @implementation CursorAction
 
 - (id)init {
@@ -74,6 +26,51 @@
   }
   
   return self;
+}
+
+@end
+
+@implementation TextAction
+
+- (id)init {
+  if (self = [super init]) {
+    return [self initWithRange:NSMakeRange(0, 0) text:nil];
+  }
+  
+  return self;
+}
+
+- (id)initWithAction:(TextAction *)action {
+  if (self = [super init]) {
+    return [self initWithRange:action.range text:action.text];
+  }
+  
+  return self;
+}
+
+- (id)initWithRange:(NSRange)range text:(NSString *)text {
+  if (self = [super init]) {
+    _user = -1;
+    _range = range;
+    _text = text;
+    _editType = [self type:range];
+  }
+  return self;
+}
+
+- (id)initWithUser:(NSInteger)user text:(NSString *)text editType:(EditType)type {
+  if (self = [super init]) {
+    _user = user;
+    _range = NSMakeRange(0, 0);
+    _text = text;
+    _editType = type;
+  }
+  
+  return self;
+}
+
+- (EditType)type:(NSRange)range{
+  return (range.length == 0) ? INSERT : REMOVE;
 }
 
 @end

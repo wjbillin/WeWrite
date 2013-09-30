@@ -30,7 +30,7 @@
   
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(renderIncomingEdits:)
-                                               name:renderTextEditsNotificationName
+                                               name:renderUpdatesNotificationName
                                              object:nil];
   
   return self;

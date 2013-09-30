@@ -8,5 +8,5 @@
 
 #import <Foundation/Foundation.h>
 
-extern NSString *renderTextEditsDictName;
-extern NSString *renderTextEditsNotificationName;
+extern NSString *renderUpdatesDictName;
+extern NSString *renderUpdatesNotificationName;
