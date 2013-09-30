@@ -18,7 +18,7 @@
 
 @end
 
-NSString* SESSION_NAME = @"bfdksjlafldfbdkslfjkjn";
+NSString* SESSION_NAME = @"bfdksjlafldfbdkslfjkjo";
 NSString* TEXT_EVENT = @"TEXT_EVENT";
 NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 
@@ -168,17 +168,16 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 - (void)receiveActions {
   Deque *finishedTextEdits = [[Deque alloc] init];
   
-  // record cursor movements
   while ([self.incomingActions size] != 0) {
     if([[self.incomingActions front] isKindOfClass:CursorAction.class]) {
-      // this is a cursor movement
+      // This is a cursor movement.
       CursorAction *cursor = [self.incomingActions popQueue];
       
       NSLog(@"Moving user %d to position %d.", cursor.user, cursor.position);
       [self.userCursors setObject:@(cursor.position) forKey:@(cursor.user)];
       
     } else {
-      // this is a text add
+      // Text action.
       
       // Figure out the location/length of this text edit.
       ServerTextAction *serverAction = [self.incomingActions popQueue];
@@ -189,19 +188,7 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
       int length = (serverAction.editType == REMOVE) ? serverAction.text.length : 0;
       LocalTextAction *localAction = [[LocalTextAction alloc] initWithRange:NSMakeRange(location, length)
                                                                        text:serverAction.text];
-      
-      // Update the user's cursor appropriately.
-      if (serverAction.editType == INSERT) {
-        NSLog(@"Adjusting a users cursor for insert from %d to %d",
-              location,
-              location + serverAction.text.length);
-        
-        int textLength = serverAction.text.length;
-        [self.userCursors setObject:[NSNumber numberWithInt:(location + textLength)] forKey:user];
-      } else {
-        NSLog(@"Adjusting a users cursor for remove from %d to %d", location, location - length);
-        [self.userCursors setObject:[NSNumber numberWithInt:(location - length)] forKey:user];
-      }
+      [self updateCursors:localAction];
       
       [finishedTextEdits push:localAction];
     }
@@ -218,8 +205,29 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
                                                    userInfo:dict]];
 }
 
+// Loop through the cursors and update the positions based on the text action.
+- (void)updateCursors:(LocalTextAction *)textAction {
+  int leftIndex = textAction.range.location - textAction.range.length;
+  int rightIndex = (textAction.editType == REMOVE) ?
+      textAction.range.location : textAction.range.location + textAction.text.length;
+  
+  for (NSNumber* __strong location in self.userCursors) {
+    if (textAction.editType == REMOVE) {
+      if (location.intValue > rightIndex) {
+        location = [NSNumber numberWithInt:(location.intValue - textAction.range.length)];
+      } else if (location.intValue > leftIndex) {
+        location = [NSNumber numberWithInt:leftIndex];
+      }
+    } else {
+      if (location.intValue >= leftIndex) {
+        location = [NSNumber numberWithInt:(location.intValue + textAction.text.length)];
+      }
+    }
+  }
+}
 
--(void) client:(CollabrifyClient *)client receivedEventWithOrderID:(int64_t)orderID submissionRegistrationID:(int32_t)submissionRegistrationID eventType:(NSString *)eventType data:(NSData *)data {
+
+- (void) client:(CollabrifyClient *)client receivedEventWithOrderID:(int64_t)orderID submissionRegistrationID:(int32_t)submissionRegistrationID eventType:(NSString *)eventType data:(NSData *)data {
   
   if([eventType isEqualToString:CURSOR_EVENT]) {
     // cursor change
