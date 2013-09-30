@@ -18,7 +18,7 @@
 
 @end
 
-NSString* SESSION_NAME = @"bfdksjlafldfbdkslfjkjk";
+NSString* SESSION_NAME = @"bfdksjlafldfbdkslfjkjn";
 NSString* TEXT_EVENT = @"TEXT_EVENT";
 NSString* CURSOR_EVENT = @"CURSOR_EVENT";
 
@@ -145,7 +145,7 @@ NSString* CURSOR_EVENT = @"CURSOR_EVENT";
   }
 }
 
-- (void)sendCursorMove: (NSUInteger)location {
+- (void)sendCursorMove:(NSUInteger)location {
   CursorUpdate *cursorUpdate = new CursorUpdate();
   cursorUpdate->set_position(location);
   cursorUpdate->set_user(self.client.participantID);

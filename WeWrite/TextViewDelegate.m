@@ -111,15 +111,16 @@ int lastSelectedLocation = 0;
 }
 
 - (void)textViewDidChangeSelection:(UITextView *)textView {
-  //NSLog(@"text view did change selection, location: %d", textView.selectedRange.location);
-  
-  // broadcast cursor move change
-  [[TextCollabrifyClient sharedClient] sendCursorMove: textView.selectedRange.location];
+  NSLog(@"text view did change selection, location: %d, length: %d", textView.selectedRange.location, textView.selectedRange.length);
 
   if (selectionChangeFromInput || textView.selectedRange.location == lastSelectedLocation) {
     selectionChangeFromInput = NO;
   } else {
     NSLog(@"invalidating timer from cursor change");
+    
+    // This broadcasts right away. See if we can't send this as part of the same move as the built
+    // up text actions.
+    [[TextCollabrifyClient sharedClient] sendCursorMove:textView.selectedRange.location];
   
     if (self.timer.isValid) {
       [self.timer invalidate];
@@ -285,13 +286,22 @@ int lastSelectedLocation = 0;
                               [self.globalTruthText substringFromIndex:location]];
     } else {
       self.globalTruthText = [NSString stringWithFormat:@"%@%@",
-                              [self.globalTruthText substringToIndex:location],
-                              [self.globalTruthText substringFromIndex:(location + length)]];
+                              [self.globalTruthText substringToIndex:(location - length)],
+                              [self.globalTruthText substringFromIndex:location]];
     }
   }
     
   dispatch_async(dispatch_get_main_queue(), ^{
     [textView setText:self.globalTruthText];
+
+    TextCollabrifyClient *textClient = [TextCollabrifyClient sharedClient];
+    NSNumber* user = [NSNumber numberWithInt:textClient.client.participantID];
+    NSNumber* selfCursor = [textClient.userCursors objectForKey:user];
+    
+    // Make sure to set this boolean so we don't have a cyclical cursor movement -> callback -> action
+    // loop.
+    selectionChangeFromInput = YES;
+    textView.selectedRange = NSMakeRange(selfCursor.intValue, 0);
   });
     
   } @catch (NSException *exception) {
