@@ -9,8 +9,11 @@
 #import "Constants.h"
 #import "TextViewController.h"
 #import "TextViewDelegate.h"
+#import "TextCollabrifyClient.h"
 
 #define TOP_TOOLBAR_HEIGHT 50
+#define BUTTON_HEIGHT 20
+#define BUTTON_WIDTH 50
 
 @interface TextViewController ()
 
@@ -26,6 +29,7 @@
     
     _undoButton = [[UIButton alloc] init];
     _redoButton = [[UIButton alloc] init];
+    _exitButton = [[UIButton alloc] init];
   }
   
   [[NSNotificationCenter defaultCenter] addObserver:self
@@ -37,25 +41,40 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+  [self.view setBackgroundColor:[UIColor orangeColor]];
   [self setUpButtons];
   [self setUpTextView];
 }
 
 - (void)setUpButtons {
-  self.undoButton.frame = CGRectMake(10, 10, 100, 30);
-  [self.undoButton setTitle:@"Undo" forState:UIControlStateNormal];
+  
+  CGFloat width = [[UIScreen mainScreen] bounds].size.width;
+  CGRect rect = CGRectMake(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
+  self.undoButton.frame = rect;
+  
+  [self.undoButton setCenter:CGPointMake(width/5, TOP_TOOLBAR_HEIGHT/1.5)];
+  [self.undoButton setTitle:@"undo" forState:UIControlStateNormal];
   [self.undoButton addTarget:self
                       action:@selector(undo)
             forControlEvents:UIControlEventTouchUpInside];
   
-  self.redoButton.frame = CGRectMake(170, 10, 100, 30);
-  [self.redoButton setTitle:@"Redo" forState:UIControlStateNormal];
+  self.redoButton.frame = rect;
+  [self.redoButton setCenter:CGPointMake(width/2, TOP_TOOLBAR_HEIGHT/1.5)];
+  [self.redoButton setTitle:@"redo" forState:UIControlStateNormal];
   [self.redoButton addTarget:self
                       action:@selector(redo)
             forControlEvents:UIControlEventTouchUpInside];
   
+  self.exitButton.frame = rect;
+  [self.exitButton setCenter:CGPointMake(width/5*4, TOP_TOOLBAR_HEIGHT/1.5)];
+  [self.exitButton setTitle:@"exit" forState:UIControlStateNormal];
+  [self.exitButton addTarget:self
+                      action:@selector(exit)
+            forControlEvents:UIControlEventTouchUpInside];
+  
   [self.view addSubview:self.undoButton];
   [self.view addSubview:self.redoButton];
+  [self.view addSubview:self.exitButton];
 }
 
 - (void)setUpTextView {
@@ -79,6 +98,11 @@
 
 - (void)redo {
   [self.delegate redo:self.textView];
+}
+
+- (void)exit {
+  [[TextCollabrifyClient sharedClient] deleteSession];
+  [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end
