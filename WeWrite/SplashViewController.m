@@ -49,8 +49,8 @@
   CGRect screen = [[UIScreen mainScreen] bounds];
   UILabel *title = [[UILabel alloc] initWithFrame:screen];
   [title setTextAlignment:NSTextAlignmentCenter];
-  [title setFont:[UIFont fontWithName:@"Helvetica" size:48]];
-  [title setText:@"edit"];
+  [title setFont:[UIFont fontWithName:@"HelveticaNeue" size:64]];
+  [title setText:@"Cœdit"];
   [title setCenter:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 100)];
   
   [self.view addSubview:title];
