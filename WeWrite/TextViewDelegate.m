@@ -169,36 +169,39 @@ int lastSelectedLocation = 0;
 // Merge a series of single edits (i.e. (INSERT, {0,0}, 'h'), (INSERT, {1,0}, 'i')) into a series of merged
 // edits (i.e. (INSERT, {0,0}, 'hi')). However, this function makes no effort to resolve these 'merged
 // edits' (i.e. (INSERT, {0,0}, 'here'), (DELETE, {2,2}, 're'), (INSERT, {2,0}, 'm') is NOT resolved to the
-// single edit (INSERT, {0,0}, 'hem'), although it is semantically correct to do so. For thatfunctionality,
-// please see resolveMergedEdits.
+// single edit (INSERT, {0,0}, 'hem'), although it may be semantically correct to do so.
 - (Deque *)mergeSingleEdits {
   id singleEdit;
-  TextAction *currentMergedEdit;
+  id currentMergedEdit;
   Deque *mergedEdits = [[Deque alloc] init];
 
   while ((singleEdit = [self.currentEdit popQueue])) {
     if ([singleEdit isKindOfClass:[CursorAction class]]) {
       [mergedEdits push:singleEdit];
+      currentMergedEdit = singleEdit;
       continue;
     }
     
     TextAction *singleTextEdit = singleEdit;
-    if ([mergedEdits empty] || currentMergedEdit.editType != singleTextEdit.editType) {
+    if ([mergedEdits empty] ||
+        [currentMergedEdit isKindOfClass:[CursorAction class]] ||
+        singleTextEdit.editType != ((TextAction *)currentMergedEdit).editType) {
       // This is the first action or the actions are different.
       [mergedEdits push:singleEdit];
       currentMergedEdit = singleEdit;
     } else {
       // The actions are of the same type. Merge them.
+      TextAction *mergedTextEdit = currentMergedEdit;
       if (singleTextEdit.editType == REMOVE) {
-        currentMergedEdit.range =
+        mergedTextEdit.range =
             NSMakeRange(singleTextEdit.range.location,
-                        currentMergedEdit.range.length + singleTextEdit.range.length);
+                        mergedTextEdit.range.length + singleTextEdit.range.length);
         
-        currentMergedEdit.text = (currentMergedEdit.text) ?
-            [singleTextEdit.text stringByAppendingString:currentMergedEdit.text] : singleTextEdit.text;
+        mergedTextEdit.text = (mergedTextEdit.text) ?
+            [singleTextEdit.text stringByAppendingString:mergedTextEdit.text] : singleTextEdit.text;
       } else if (singleTextEdit.editType == INSERT) {
-        currentMergedEdit.text = (currentMergedEdit.text) ?
-            [currentMergedEdit.text stringByAppendingString:singleTextEdit.text] : singleTextEdit.text;
+        mergedTextEdit.text = (mergedTextEdit.text) ?
+            [mergedTextEdit.text stringByAppendingString:singleTextEdit.text] : singleTextEdit.text;
       }
     }
   }
@@ -213,13 +216,18 @@ int lastSelectedLocation = 0;
 // (INSERT, {2, 0}, ' likes to eat')}, then this function will resolve mergedEdits into a deque with a
 // single action - {(INSERT, {0,0}, 'he likes to eat')}.
 - (Deque *)resolveMergedEdits:(Deque *)mergedEdits {
+  if (!mergedEdits || [mergedEdits empty]) {
+    NSLog(@"resolveMergedEdits called with nil or empty edit deque");
+    return nil;
+  }
+  
   Deque *finalEdits = [[Deque alloc] init];
   
-  TextAction *lastAction = [mergedEdits back];
-  int smallestIndex, ogCursorIndex;
-  smallestIndex = ogCursorIndex = lastAction.range.location;
-  
+  // Initialize invariants.
   TextAction *curAction = [mergedEdits popQueue];
+  int smallestIndex, ogCursorIndex;
+  smallestIndex = ogCursorIndex = curAction.range.location;
+  
   [finalEdits push:curAction];
   
   while ((curAction = [mergedEdits popQueue])) {
@@ -230,13 +238,16 @@ int lastSelectedLocation = 0;
         int netDeletionLength = ogCursorIndex - curAction.range.location;
         curAction.range = NSMakeRange(curAction.range.location, netDeletionLength);
         
+        // If there are delete sequences that overwrite each other, we need to keep track of the total
+        // text deleted. We do this by appending the text removed by the last delete with the text removed
+        // by the current delete.
         TextAction* ogDeleteAction = [finalEdits back];
         if (ogDeleteAction.editType == REMOVE && ogDeleteAction != curAction) {
           NSLog(@"Smallest index is %d and curAction location is %d", smallestIndex, curAction.range.location);
           curAction.text =
-          [NSString stringWithFormat:@"%@%@",
-           [curAction.text substringToIndex:(smallestIndex - curAction.range.location)],
-           ogDeleteAction.text];
+              [NSString stringWithFormat:@"%@%@",
+              [curAction.text substringToIndex:(smallestIndex - curAction.range.location)],
+              ogDeleteAction.text];
           
           curAction.range = NSMakeRange(curAction.range.location, curAction.text.length);
         } else {
