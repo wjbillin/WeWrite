@@ -19,7 +19,7 @@
 @end
 
 
-NSString* SESSION_NAME = @"bfdfladfdfbdkslkjx";
+NSString* SESSION_NAME = @"bfdfladfdfbdkslkjzd";
 NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
 
 @implementation TextCollabrifyClient
@@ -45,15 +45,17 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
                                           accessToken:@"XY3721425NoScOpE"
                                        getLatestEvent:NO
                                                 error:&err];
-  
-    _userCursors = [[NSMutableDictionary alloc] init];
-    _incomingActions = [[Deque alloc] init];    
+    _incomingActions = [[Deque alloc] init];
     
     [self.client setDelegate:self];
     [self.client setDataSource:self];
   }
   
   return self;
+}
+
+- (int64_t)getSelfID {
+  return self.client.participantID;
 }
 
 - (void)findSession {
@@ -117,14 +119,14 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
   }];
 }
 
-- (void)sendActionsAndSync:(Deque *)localActions {
+- (void)sendActions:(Deque *)localActions {
   NSLog(@"The text did change. %d edits.", localActions.size);
   
   id action;
   EditSeries *editSeries = new EditSeries();
   editSeries->set_user(self.client.participantID);
   
-  while ((action = [localActions popQueue])) {
+  while ((action = [localActions popFront])) {
     Edit* edit = editSeries->add_edits();
     
     // Check if action is a cursor position change or a text action.
@@ -133,6 +135,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
       edit->set_type(
         (textAction.editType == INSERT) ? Edit_ChangeType_INSERT : Edit_ChangeType_REMOVE);
       edit->set_text([textAction.text cStringUsingEncoding:[NSString defaultCStringEncoding]]);
+      edit->set_isundo(textAction.isUndo);
     } else {
       CursorAction *cursorAction = action;
       edit->set_type(Edit_ChangeType_CURSOR);
@@ -154,74 +157,12 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
   }
 }
 
-- (void)receiveActions {
-  
-  // Deque of updates to eventually send to text delegate.
-  Deque *finishedUpdates = [[Deque alloc] init];
-  
-  while ([self.incomingActions size] > 0) {
-    if([[self.incomingActions back] isKindOfClass:CursorAction.class]) {
-      // This is a cursor movement.
-      CursorAction *cursorAction = [self.incomingActions popQueue];
-      
-      [self.userCursors setObject:[NSNumber numberWithInt:cursorAction.position]
-                           forKey:[NSNumber numberWithInt:cursorAction.user]];
-    } else {
-      // Text action. Figure out the location/length of this text edit.
-      TextAction *textAction = [self.incomingActions popQueue];
 
-      NSNumber *user = [NSNumber numberWithInteger:textAction.user];
-      NSNumber *loc = [self.userCursors objectForKey:user];
-      
-      int location = loc.intValue;
-      int length = (textAction.editType == REMOVE) ? textAction.text.length : 0;
-      textAction.range = NSMakeRange(location, length);
-      
-      [self updateCursors:textAction];
-      
-      [finishedUpdates pushBack:textAction];
-    }
-  }
-  
-  // Create a dictionary to hold the finished edits.
-  NSDictionary *dict = [[NSDictionary alloc] initWithObjects:@[ finishedUpdates ]
-                                                     forKeys:@[ renderUpdatesDictName ]];
-  
-  // Notify the text delegate that there are text edits to render.
-  [[NSNotificationCenter defaultCenter]
-      postNotification:[NSNotification notificationWithName:renderUpdatesNotificationName
-                                                     object:nil
-                                                   userInfo:dict]];
-}
-
-// Loop through the cursors and update the positions based on the text action.
-- (void)updateCursors:(TextAction *)textAction {
-  int leftIndex = textAction.range.location - textAction.range.length;
-  int rightIndex = (textAction.editType == REMOVE) ?
-      textAction.range.location : textAction.range.location + textAction.text.length;
-  
-  for (id key in [self.userCursors allKeys]) {
-    NSNumber* location = [self.userCursors objectForKey:key];
-    NSLog(@"cursor location is %d, action location: %d, length: %d, text: [%@]",
-          location.intValue, textAction.range.location, textAction.range.length, textAction.text);
-    if (textAction.editType == REMOVE) {
-      if (location.intValue > rightIndex) {
-        location = [NSNumber numberWithInt:(location.intValue - textAction.range.length)];
-      } else if (location.intValue > leftIndex) {
-        location = [NSNumber numberWithInt:leftIndex];
-      }
-    } else {
-      if (location.intValue >= leftIndex) {
-        location = [NSNumber numberWithInt:(location.intValue + textAction.text.length)];
-      }
-    }
-    
-    [self.userCursors setObject:location forKey:key];
-  }
-}
-
-
-- (void) client:(CollabrifyClient *)client receivedEventWithOrderID:(int64_t)orderID submissionRegistrationID:(int32_t)submissionRegistrationID eventType:(NSString *)eventType data:(NSData *)data {
+- (void)client:(CollabrifyClient *)client
+    receivedEventWithOrderID:(int64_t)orderID
+    submissionRegistrationID:(int32_t)submissionRegistrationID
+                   eventType:(NSString *)eventType
+                        data:(NSData *)data {
   
   EditSeries *editSeries = new EditSeries();
   editSeries->ParseFromArray([data bytes], data.length);
@@ -239,14 +180,25 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
       NSString* text = [NSString stringWithCString:edit.text().c_str() encoding:NSASCIIStringEncoding];
       TextAction *textAction =
           [[TextAction alloc] initWithUser:editSeries->user() text:text editType:type];
+      textAction.isUndo = edit.isundo();
       
       [self.incomingActions pushBack:textAction];
     }
   }
   
-  // Actually process the actions. Yay!
-  [self receiveActions];
+  // Create a dictionary to hold the finished edits.
+  Deque* incomingActionsCopy = [Deque dequeWithDeque:self.incomingActions];
+  NSDictionary *dict = [[NSDictionary alloc] initWithObjects:@[ incomingActionsCopy ]
+                                                     forKeys:@[ renderUpdatesDictName ]];
   
+  // Notify the text delegate that there are text edits to render.
+  [[NSNotificationCenter defaultCenter]
+   postNotification:[NSNotification notificationWithName:renderUpdatesNotificationName
+                                                  object:nil
+                                                userInfo:dict]];
+  
+  // Clear the incoming edits.
+  [self.incomingActions clear];
 }
 
 @end

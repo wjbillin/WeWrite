@@ -32,6 +32,8 @@ typedef enum {
 @property (nonatomic, assign) NSRange range;
 @property (nonatomic, retain) NSString *text;
 @property (nonatomic, assign) EditType editType;
+@property (nonatomic, assign) BOOL isUndo;
+@property (nonatomic, assign) BOOL isRedo;
 
 - (id)init;
 - (id)initWithAction:(TextAction *)action;

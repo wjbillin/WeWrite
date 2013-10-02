@@ -15,13 +15,13 @@
 
 @property (nonatomic, retain) CollabrifyClient* client;
 @property (nonatomic, retain) Deque *incomingActions;
-@property (nonatomic, retain) NSMutableDictionary *userCursors;
 
 + (id)sharedClient;
 
 - (id)init;
 - (void)findSession;
 - (void)deleteSession;
-- (void)sendActionsAndSync:(Deque *)finalEdits;
+- (int64_t)getSelfID;
+- (void)sendActions:(Deque *)finalEdits;
 
 @end
