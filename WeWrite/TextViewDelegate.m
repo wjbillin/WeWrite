@@ -318,12 +318,6 @@ int lastSelectedLocation = 0;
       } else {
         // Text action. Figure out the location/length of this text edit.
         TextAction *textAction = action;
-        NSLog(@"text: %@, type: %@, location: %d, length: %d",
-              textAction.text,
-              (textAction.editType) ? @"REMOVE" : @"INSERT",
-              textAction.range.location,
-              textAction.range.length);
-        
         NSNumber *user = [NSNumber numberWithInteger:textAction.user];
         NSNumber *loc = [self.userCursors objectForKey:user];
         int cursorBasedLocation = loc.intValue;
@@ -333,11 +327,23 @@ int lastSelectedLocation = 0;
         // since undo/redo's carry their own location.
         if (!textAction.isUndo && !textAction.isRedo) {
           textAction.range = NSMakeRange(cursorBasedLocation, length);
+        } else {
+          // This is an undo/redo. The location has already been set, but the length is zero.
+          // Fix this for removes.
+          if (textAction.editType == REMOVE) {
+            textAction.range = NSMakeRange(textAction.range.location, textAction.text.length);
+          }
         }
 
         if (![self verifyEdit:textAction]) {
           continue;
         }
+        
+        NSLog(@"text to be applied: %@, type: %@, location: %d, length: %d",
+              textAction.text,
+              (textAction.editType) ? @"REMOVE" : @"INSERT",
+              textAction.range.location,
+              textAction.range.length);
       
         [self updateUndoRedoStacks:textAction];
         [self updateCursors:textAction];
@@ -345,6 +351,11 @@ int lastSelectedLocation = 0;
         int selfUser = [[TextCollabrifyClient sharedClient] getSelfID];
         if (textAction.user == selfUser && !textAction.isUndo) {
           // If this is our action and not the result of an undo, add it to the undo stack.
+          NSLog(@"pushing action onto undo stack, loc: %d, len: %d, text:[%@]",
+                textAction.range.location,
+                textAction.range.length,
+                textAction.text);
+          
           [self.undoStack pushBack:textAction];
         } else if (textAction.user == selfUser && textAction.isUndo) {
           // This is our action and an undo - add it to the redo stack.
@@ -407,6 +418,7 @@ int lastSelectedLocation = 0;
       }
     } else {
       if (location.intValue >= leftIndex) {
+        NSLog(@"moving cursor up");
         location = [NSNumber numberWithInt:(location.intValue + textAction.text.length)];
       }
     }
@@ -425,23 +437,23 @@ int lastSelectedLocation = 0;
 - (void)updateEditStack:(Deque *)editStack forTextAction:(TextAction *)newAction {
   int leftIndexNew = newAction.range.location - newAction.range.length;
   int rightIndexNew = (newAction.editType == REMOVE) ?
-  newAction.range.location : newAction.range.location + newAction.text.length;
+      newAction.range.location : newAction.range.location + newAction.text.length;
   
   int stackSize = [editStack size];
   for (int i = 0; i < stackSize; ++i) {
     TextAction *temp = [editStack popFront];
     int leftIndexUndo = temp.range.location - temp.range.length;
     int rightIndexUndo = (temp.editType == REMOVE) ?
-    temp.range.location : temp.range.location + temp.text.length;
+        temp.range.location : temp.range.location + temp.text.length;
     
     if (temp.editType == INSERT) {
       if (newAction.editType == INSERT &&
-          (leftIndexNew > leftIndexUndo && leftIndexNew <= rightIndexUndo)) {
+          (leftIndexNew > leftIndexUndo && leftIndexNew < rightIndexUndo)) {
         // The new action has split up this insertion on the undo stack. Throw it out.
         NSLog(@"Throwing out undo/redo insertion because of insertion");
         continue;
       } else if (newAction.editType == REMOVE &&
-                 (leftIndexNew <= rightIndexUndo && rightIndexNew >= leftIndexUndo)) {
+                 (leftIndexNew < rightIndexUndo && rightIndexNew > leftIndexUndo)) {
         // The new action has deleted some of this insertion on the undo stack. Throw it out.
         NSLog(@"Throwing out undo/redo insertion because of deletion");
         continue;
@@ -449,7 +461,7 @@ int lastSelectedLocation = 0;
     }
     
     // We haven't thrown out the undo action. Update it to reflect the new change.
-    if (leftIndexNew <= leftIndexUndo) {
+    if (leftIndexNew < leftIndexUndo) {
       if (newAction.editType == INSERT) {
         temp.range = NSMakeRange(temp.range.location + newAction.text.length, temp.range.length);
       } else {
@@ -468,7 +480,13 @@ int lastSelectedLocation = 0;
     return YES;
   }
   
-  NSRange rangeToDelete = NSMakeRange(action.range.location - action.range.length, action.range.length);
+  NSRange rangeToDelete = NSMakeRange(action.range.location - action.range.length,
+                                      action.range.length);
+  NSLog(@"Verifying delete. Global truth is %@ and range is loc: %d len: %d",
+        self.globalTruthText,
+        rangeToDelete.location,
+        rangeToDelete.length);
+  
   if (![[self.globalTruthText substringWithRange:rangeToDelete] isEqualToString:action.text]) {
     return NO;
   }
@@ -494,14 +512,20 @@ int lastSelectedLocation = 0;
     undoAction = [[TextAction alloc] initWithUser:lastAction.user
                                              text:lastAction.text
                                          editType:REMOVE];
-    undoAction.range = NSMakeRange(lastAction.range.location, lastAction.text.length);
+    undoAction.range = NSMakeRange(lastAction.range.location + lastAction.text.length,
+                                   lastAction.text.length);
   } else {
     undoAction = [[TextAction alloc] initWithUser:lastAction.user
                                              text:lastAction.text
                                          editType:INSERT];
-    undoAction.range = NSMakeRange(lastAction.range.location, 0);
+    undoAction.range = NSMakeRange(lastAction.range.location - lastAction.range.length, 0);
   }
   undoAction.isUndo = YES;
+  
+  NSLog(@"Popped out undo action: loc: %d, len: %d, text: [%@]",
+        undoAction.range.location,
+        undoAction.range.length,
+        undoAction.text);
   
   Deque* actions = [[Deque alloc] init];
   [actions pushBack:undoAction];
