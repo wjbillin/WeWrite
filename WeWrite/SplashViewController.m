@@ -32,29 +32,32 @@
 {
   [super viewDidLoad];
 
-  [self.view setBackgroundColor:[UIColor orangeColor]];
+  [self.view setBackgroundColor:[UIColor whiteColor]];
   
   self.joinButton = [UIButton buttonWithType:UIButtonTypeSystem];
-  [self.joinButton setFrame:CGRectMake(0, 0, 200, 50)];
-  
+
+  CGRect screen = [[UIScreen mainScreen] bounds];
   CGRect bounds = [self.view bounds];
-  [self.joinButton setCenter:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 30)];
+  [self.joinButton setFrame:CGRectMake(0, 0, screen.size.width - 50, 50)];
+  [self.joinButton setCenter:CGPointMake(CGRectGetMidX(bounds), screen.size.height - 50)];
   [self.joinButton setTitle:@"start" forState:UIControlStateNormal];
+  [self.joinButton.titleLabel setFont:[UIFont fontWithName:@"HelveticaNeue-Light" size:30]];
+  [self.joinButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+  [self.joinButton setBackgroundColor:[UIColor orangeColor] ];
   [self.joinButton addTarget:self
                       action:@selector(joinSession)
             forControlEvents:UIControlEventTouchUpInside];
-
   
+  UIImage *image = [UIImage imageNamed:@"logo.png"];
+  UIImage *scaledImage =
+  [UIImage imageWithCGImage:[image CGImage]
+                      scale:(image.scale * 3.0)
+                orientation:(image.imageOrientation)];
+  UIImageView *imageView = [[UIImageView alloc] initWithImage:scaledImage];
   
-  CGRect screen = [[UIScreen mainScreen] bounds];
-  UILabel *title = [[UILabel alloc] initWithFrame:screen];
-  [title setTextAlignment:NSTextAlignmentCenter];
-  [title setFont:[UIFont fontWithName:@"HelveticaNeue" size:64]];
-  [title setText:@"Cœdit"];
-  [title setCenter:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 100)];
-  title.backgroundColor = [UIColor clearColor];
+  [imageView setCenter:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 100)];
   
-  [self.view addSubview:title];
+  [self.view addSubview:imageView];
   [self.view addSubview:self.joinButton];
 }
 

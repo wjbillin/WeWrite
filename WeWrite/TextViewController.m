@@ -50,10 +50,12 @@
   
   CGFloat width = [[UIScreen mainScreen] bounds].size.width;
   CGRect rect = CGRectMake(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
+  UIFont *font = [UIFont fontWithName:@"HelveticaNeue-Light" size:22];
   self.undoButton.frame = rect;
   
   [self.undoButton setCenter:CGPointMake(width/5, TOP_TOOLBAR_HEIGHT/1.5)];
   [self.undoButton setTitle:@"undo" forState:UIControlStateNormal];
+  [self.undoButton.titleLabel setFont:font];
   [self.undoButton addTarget:self
                       action:@selector(undo)
             forControlEvents:UIControlEventTouchUpInside];
@@ -61,6 +63,7 @@
   self.redoButton.frame = rect;
   [self.redoButton setCenter:CGPointMake(width/2, TOP_TOOLBAR_HEIGHT/1.5)];
   [self.redoButton setTitle:@"redo" forState:UIControlStateNormal];
+  [self.redoButton.titleLabel setFont:font];
   [self.redoButton addTarget:self
                       action:@selector(redo)
             forControlEvents:UIControlEventTouchUpInside];
@@ -68,6 +71,7 @@
   self.exitButton.frame = rect;
   [self.exitButton setCenter:CGPointMake(width/5*4, TOP_TOOLBAR_HEIGHT/1.5)];
   [self.exitButton setTitle:@"exit" forState:UIControlStateNormal];
+  [self.exitButton.titleLabel setFont:font];
   [self.exitButton addTarget:self
                       action:@selector(exit)
             forControlEvents:UIControlEventTouchUpInside];
@@ -79,6 +83,7 @@
 
 - (void)setUpTextView {
   CGSize screenSize = [[UIScreen mainScreen] bounds].size;
+  [self.textView setFont:[UIFont fontWithName:@"Courier New" size:12]];
   [self.textView setFrame:CGRectMake(0,
                                      TOP_TOOLBAR_HEIGHT,
                                      screenSize.width,

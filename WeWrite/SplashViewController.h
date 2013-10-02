@@ -15,5 +15,4 @@
 @property (nonatomic, retain) UIActivityIndicatorView* spinny;
 @property (nonatomic, retain) UIButton* joinButton;
 
-
 @end
