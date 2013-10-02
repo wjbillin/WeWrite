@@ -165,7 +165,8 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
       // This is a cursor movement.
       CursorAction *cursorAction = [self.incomingActions popQueue];
       
-      [finishedUpdates pushBack:cursorAction];
+      [self.userCursors setObject:[NSNumber numberWithInt:cursorAction.position]
+                           forKey:[NSNumber numberWithInt:cursorAction.user]];
     } else {
       // Text action. Figure out the location/length of this text edit.
       TextAction *textAction = [self.incomingActions popQueue];
