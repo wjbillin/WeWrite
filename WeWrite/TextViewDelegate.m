@@ -91,7 +91,7 @@ int lastSelectedLocation = 0;
   return YES;
 }
 
-- (void)textViewDidChange:(UITextView *)textView {
+/*- (void)textViewDidChange:(UITextView *)textView {
   //NSLog(@"TextViewDidChange callback, selected position: %d", textView.selectedRange.location);
   
   TextAction *lastAction = [self.currentEdit back];
@@ -117,7 +117,7 @@ int lastSelectedLocation = 0;
           lastAction.range.length,
           lastAction.text);
   }
-}
+}*/
 
 - (void)textViewDidChangeSelection:(UITextView *)textView {
   NSLog(@"text view did change selection, location: %d, length: %d", textView.selectedRange.location, textView.selectedRange.length);
@@ -258,8 +258,8 @@ int lastSelectedLocation = 0;
           curAction.range = NSMakeRange(curAction.range.location, netDeletionLength);
           
           // If there are delete sequences that overwrite each other, we need to keep track of the total
-          // text deleted. We do this by appending the text removed by the last delete with the text removed
-          // by the current delete.
+          // text deleted. We do this by appending the text removed by the last delete with the text
+          // removed by the current delete.
           TextAction* ogDeleteAction = [finalEdits front];
           if (ogDeleteAction.editType == REMOVE && ogDeleteAction != curAction) {
             NSLog(@"Smallest index is %d and curAction location is %d", smallestIndex, curAction.range.location);
