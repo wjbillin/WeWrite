@@ -161,7 +161,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
   Deque *finishedUpdates = [[Deque alloc] init];
   
   while ([self.incomingActions size] > 0) {
-    if([[self.incomingActions front] isKindOfClass:CursorAction.class]) {
+    if([[self.incomingActions back] isKindOfClass:CursorAction.class]) {
       // This is a cursor movement.
       CursorAction *cursorAction = [self.incomingActions popQueue];
       

@@ -236,8 +236,6 @@ int lastSelectedLocation = 0;
     
     [finalEdits pushBack:curAction];
     
-
-     
     while ((curAction = [mergedEdits popQueue])) {
       TextAction* lastAction = [finalEdits front];
       
@@ -296,40 +294,40 @@ int lastSelectedLocation = 0;
   
   @try {
     
-  TextAction *action;
-  while ((action = [renderableEdits popQueue])) {
-    NSLog(@"text: %@, type: %@, location: %d, length: %d",
-          action.text,
-          (action.editType) ? @"REMOVE" : @"INSERT",
-          action.range.location,
-          action.range.length);
-    
-    int location = action.range.location;
-    int length = action.range.length;
-    if (action.editType == INSERT) {
-      [self.globalTruthText insertString:action.text atIndex:location];
-    } else {
-      NSRange deletedCharactersRange = NSMakeRange(location - length, length);
-      [self.globalTruthText deleteCharactersInRange:deletedCharactersRange];
+    TextAction *action;
+    while ((action = [renderableEdits popQueue])) {
+      
+      NSLog(@"text: %@, type: %@, location: %d, length: %d",
+            action.text,
+            (action.editType) ? @"REMOVE" : @"INSERT",
+            action.range.location,
+            action.range.length);
+      
+      int location = action.range.location;
+      int length = action.range.length;
+      if (action.editType == INSERT) {
+        [self.globalTruthText insertString:action.text atIndex:location];
+      } else {
+        NSRange deletedCharactersRange = NSMakeRange(location - length, length);
+        [self.globalTruthText deleteCharactersInRange:deletedCharactersRange];
+      }
     }
-  }
-    
-  dispatch_async(dispatch_get_main_queue(), ^{
-    NSLog(@"calling dispatch async");
-    [textView setText:[NSString stringWithString:self.globalTruthText]];
+      
+    dispatch_async(dispatch_get_main_queue(), ^{
+      NSLog(@"calling dispatch async");
+      [textView setText:[NSString stringWithString:self.globalTruthText]];
 
-    TextCollabrifyClient *textClient = [TextCollabrifyClient sharedClient];
-    NSNumber* user = [NSNumber numberWithInt:textClient.client.participantID];
-    NSNumber* selfCursor = [textClient.userCursors objectForKey:user];
-    
-    // Make sure to set this boolean so we don't have a cyclical cursor movement -> callback -> action
-    // loop.
-    selectionChangeFromInput = YES;
-    textView.selectedRange = NSMakeRange(selfCursor.intValue, 0);
-    
-    // SEMAPHORE SIGNAL
-  });
-    
+      TextCollabrifyClient *textClient = [TextCollabrifyClient sharedClient];
+      NSNumber* user = [NSNumber numberWithInt:textClient.client.participantID];
+      NSNumber* selfCursor = [textClient.userCursors objectForKey:user];
+      
+      // avoid cyclical cursor movement -> callback -> action loop.
+      selectionChangeFromInput = YES;
+      textView.selectedRange = NSMakeRange(selfCursor.intValue, 0);
+      
+      // SEMAPHORE SIGNAL
+    });
+      
   } @catch (NSException *exception) {
     NSLog(@" *** Exception thrown *** - \n %@", exception.reason);
     [[TextCollabrifyClient sharedClient] deleteSession];
