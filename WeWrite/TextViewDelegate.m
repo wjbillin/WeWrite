@@ -152,13 +152,13 @@ int lastSelectedLocation = 0;
   Deque *mergedEdits = [self mergeSingleEdits];
   
   // Debug print.
-  [self printQueue:mergedEdits];
+  //[self printQueue:mergedEdits];
   
   // Now, merge group add/delete sequences as much as possible.
   Deque *finalEdits = [self resolveMergedEdits:mergedEdits];
   
   // Debug print.
-  [self printQueue:finalEdits];
+  //[self printQueue:finalEdits];
   
   // notify collab client of changes
   [[TextCollabrifyClient sharedClient] sendActionsAndSync:finalEdits];
@@ -227,59 +227,63 @@ int lastSelectedLocation = 0;
     cursorMoved = [mergedEdits popQueue];
   }
   
-  // Initialize invariants.
-  TextAction *curAction = [mergedEdits popQueue];
-  int smallestIndex, ogCursorIndex;
-  smallestIndex = ogCursorIndex = curAction.range.location;
-  
-  [finalEdits pushBack:curAction];
-  
-  while ((curAction = [mergedEdits popQueue])) {
-    TextAction* lastAction = [finalEdits front];
+  if (![mergedEdits empty]) {
     
-    if (curAction.editType == REMOVE) {
-      if (curAction.range.location < smallestIndex) {
-        int netDeletionLength = ogCursorIndex - curAction.range.location;
-        curAction.range = NSMakeRange(curAction.range.location, netDeletionLength);
-        
-        // If there are delete sequences that overwrite each other, we need to keep track of the total
-        // text deleted. We do this by appending the text removed by the last delete with the text removed
-        // by the current delete.
-        TextAction* ogDeleteAction = [finalEdits back];
-        if (ogDeleteAction.editType == REMOVE && ogDeleteAction != curAction) {
-          NSLog(@"Smallest index is %d and curAction location is %d", smallestIndex, curAction.range.location);
-          curAction.text =
-              [NSString stringWithFormat:@"%@%@",
-              [curAction.text substringToIndex:(smallestIndex - curAction.range.location)],
-              ogDeleteAction.text];
+    // Initialize invariants.
+    TextAction *curAction = [mergedEdits popQueue];
+    int smallestIndex, ogCursorIndex;
+    smallestIndex = ogCursorIndex = curAction.range.location;
+    
+    [finalEdits pushBack:curAction];
+    
+
+     
+    while ((curAction = [mergedEdits popQueue])) {
+      TextAction* lastAction = [finalEdits front];
+      
+      if (curAction.editType == REMOVE) {
+        if (curAction.range.location < smallestIndex) {
+          int netDeletionLength = ogCursorIndex - curAction.range.location;
+          curAction.range = NSMakeRange(curAction.range.location, netDeletionLength);
           
-          curAction.range = NSMakeRange(curAction.range.location, curAction.text.length);
+          // If there are delete sequences that overwrite each other, we need to keep track of the total
+          // text deleted. We do this by appending the text removed by the last delete with the text removed
+          // by the current delete.
+          TextAction* ogDeleteAction = [finalEdits back];
+          if (ogDeleteAction.editType == REMOVE && ogDeleteAction != curAction) {
+            NSLog(@"Smallest index is %d and curAction location is %d", smallestIndex, curAction.range.location);
+            curAction.text =
+                [NSString stringWithFormat:@"%@%@",
+                [curAction.text substringToIndex:(smallestIndex - curAction.range.location)],
+                ogDeleteAction.text];
+            
+            curAction.range = NSMakeRange(curAction.range.location, curAction.text.length);
+          } else {
+            curAction.text = [curAction.text substringToIndex:ogCursorIndex - curAction.range.location];
+          }
+          
+          [finalEdits clear];
+          [finalEdits pushBack:curAction];
+          smallestIndex = curAction.range.location;
         } else {
-          curAction.text = [curAction.text substringToIndex:ogCursorIndex - curAction.range.location];
+          lastAction.text =
+          [lastAction.text substringToIndex:(lastAction.text.length - curAction.range.length)];
+          
+          if (!lastAction.text.length) {
+            // We've clobbered the entire insertion directly before this removal.
+            [finalEdits popStack];
+          }
         }
-        
-        [finalEdits clear];
-        [finalEdits pushBack:curAction];
-        smallestIndex = curAction.range.location;
-      } else {
-        lastAction.text =
-        [lastAction.text substringToIndex:(lastAction.text.length - curAction.range.length)];
-        
-        if (!lastAction.text.length) {
-          // We've clobbered the entire insertion directly before this removal.
-          [finalEdits popStack];
+      } else if (curAction.editType == INSERT) {
+        if (!lastAction || lastAction.editType == REMOVE) {
+          [finalEdits pushBack:curAction];
+          // TODO: Optimize, if they re-type the same shit.
+        } else {
+          lastAction.text = [lastAction.text stringByAppendingString:curAction.text];
         }
-      }
-    } else if (curAction.editType == INSERT) {
-      if (!lastAction || lastAction.editType == REMOVE) {
-        [finalEdits pushBack:curAction];
-        // TODO: Optimize, if they re-type the same shit.
-      } else {
-        lastAction.text = [lastAction.text stringByAppendingString:curAction.text];
       }
     }
   }
-  
   if(cursorMoved != nil) [finalEdits pushFront:cursorMoved];
   
   return finalEdits;
