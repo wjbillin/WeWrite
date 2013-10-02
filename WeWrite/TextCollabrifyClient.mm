@@ -18,7 +18,7 @@
 
 @end
 
-NSString* SESSION_NAME = @"bfdfladfdfbdkslkjt";
+NSString* SESSION_NAME = @"bfdfladfdfbdkslkjx";
 NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
 
 @implementation TextCollabrifyClient
@@ -46,7 +46,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
                                                 error:&err];
   
     _userCursors = [[NSMutableDictionary alloc] init];
-    _incomingActions = [[Deque alloc] init];
+    _incomingActions = [[Deque alloc] init];    
     
     [self.client setDelegate:self];
     [self.client setDataSource:self];
@@ -151,8 +151,6 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
   if (submissionID == -1) {
     NSLog(@"Error broadcasting.");
   }
-  
-  [self receiveActions];
 }
 
 - (void)receiveActions {
