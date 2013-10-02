@@ -18,7 +18,8 @@
 
 @end
 
-NSString* SESSION_NAME = @"bfdfladfdfbdkslkjw";
+
+NSString* SESSION_NAME = @"bfdfladfdfbdkslkjx";
 NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
 
 @implementation TextCollabrifyClient
@@ -46,7 +47,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
                                                 error:&err];
   
     _userCursors = [[NSMutableDictionary alloc] init];
-    _incomingActions = [[Deque alloc] init];
+    _incomingActions = [[Deque alloc] init];    
     
     [self.client setDelegate:self];
     [self.client setDataSource:self];
@@ -151,8 +152,6 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
   if (submissionID == -1) {
     NSLog(@"Error broadcasting.");
   }
-  
-  [self receiveActions];
 }
 
 - (void)receiveActions {
@@ -161,7 +160,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
   Deque *finishedUpdates = [[Deque alloc] init];
   
   while ([self.incomingActions size] > 0) {
-    if([[self.incomingActions front] isKindOfClass:CursorAction.class]) {
+    if([[self.incomingActions back] isKindOfClass:CursorAction.class]) {
       // This is a cursor movement.
       CursorAction *cursorAction = [self.incomingActions popQueue];
       
