@@ -22,6 +22,6 @@
 - (id)init;
 - (void)findSession;
 - (void)deleteSession;
-- (void)sendActions:(Deque *)finalEdits;
+- (void)sendActionsAndSync:(Deque *)finalEdits;
 
 @end

@@ -116,7 +116,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
   }];
 }
 
-- (void)sendActions:(Deque *)localActions {
+- (void)sendActionsAndSync:(Deque *)localActions {
   NSLog(@"The text did change. %d edits.", localActions.size);
   
   id action;
@@ -149,15 +149,18 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
       [self.client broadcast:[NSData dataWithBytes:bytes length:size] eventType:EDIT_SERIES_EVENT];
   
   if (submissionID == -1) {
-    NSLog(@"Error broadcasting. Aborting call.");
-    return;
+    NSLog(@"Error broadcasting.");
   }
+  
+  [self receiveActions];
 }
 
 - (void)receiveActions {
+  
+  // Deque of updates to eventually send to text delegate.
   Deque *finishedUpdates = [[Deque alloc] init];
   
-  while ([self.incomingActions size] != 0) {
+  while ([self.incomingActions size] > 0) {
     if([[self.incomingActions front] isKindOfClass:CursorAction.class]) {
       // This is a cursor movement.
       CursorAction *cursorAction = [self.incomingActions popQueue];
