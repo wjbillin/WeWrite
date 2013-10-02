@@ -24,8 +24,6 @@
 @property (nonatomic, retain) NSMutableString* globalTruthText;
 @property (nonatomic, retain) NSMutableDictionary* userCursors;
 
-@property (nonatomic, retain) dispatch_semaphore_t sema;
-
 - (id)init;
 - (void)mergeCurrentEdit;
 - (void)renderIncomingEdits:(NSNotification *)notification textView:(UITextView *)textView;

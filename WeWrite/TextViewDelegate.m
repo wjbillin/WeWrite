@@ -17,6 +17,8 @@ int textChangeFromInput = 0;
 
 int lastSelectedLocation = 0;
 
+BOOL isSyncing = NO;
+
 @interface TextViewDelegate ()
 
 @end
@@ -32,8 +34,6 @@ int lastSelectedLocation = 0;
     _timer = [[NSTimer alloc] init];
     _globalTruthText = [NSMutableString stringWithString:@""];
     _userCursors = [[NSMutableDictionary alloc] init];
-    
-    _sema = dispatch_semaphore_create(0);
   }
 
   return self;
@@ -50,6 +50,11 @@ int lastSelectedLocation = 0;
     textChangeFromInput = NO;
     return YES;
   }*/
+  
+
+  if (isSyncing) {
+    return NO;
+  }
   
   NSLog(@"Delegate called, location: %d, length: %d, selected location: %d, text is [%@]",
         range.location,
@@ -139,7 +144,9 @@ int lastSelectedLocation = 0;
     // For some reason iOS likes to send a HUGE number as the selected range location on the first
     // click in the text view.
     NSLog(@"throwing out cursor movement");
-    if(cursorChangeFromInput > 0) --cursorChangeFromInput;
+    if (cursorChangeFromInput > 0) {
+      --cursorChangeFromInput;
+    }
     lastSelectedLocation = textView.selectedRange.location;
     return;
   } else if (self.currentEdit.size && [[self.currentEdit front] isKindOfClass:[TextAction class]]) {
@@ -169,9 +176,7 @@ int lastSelectedLocation = 0;
   }
   
   // SEMAPHORE WAIT
-  //NSLog(@"starting the wait");
-  //dispatch_semaphore_wait(self.sema, dispatch_time(DISPATCH_TIME_NOW, 1*NSEC_PER_SEC));
-  //NSLog(@"done with the wait");
+  isSyncing = YES;
   
   // First, merge individual edits (usually insert/remove a single char) into group edits.
   Deque *mergedEdits = [self mergeSingleEdits];
@@ -401,18 +406,20 @@ int lastSelectedLocation = 0;
       NSNumber* user = [NSNumber numberWithInt:[textClient getSelfID]];
       NSNumber* selfCursor = [self.userCursors objectForKey:user];
       
-      /* avoid cyclical cursor movement -> callback -> action loop.
+      // avoid cyclical cursor movement -> callback -> action loop.
       if ([[UIDevice currentDevice] systemVersion].intValue > 6) {
-        NSLog(@"changing cursor, text from input to YES");
-        textChangeFromInput = YES;
-      }*/
+        NSLog(@"changing cursor from input to YES");
+        //++cursorChangeFromInput;
+      }
       ++cursorChangeFromInput;
       
       textView.selectedRange = NSMakeRange(selfCursor.intValue, 0);
       NSLog(@"MOVING CURSOR TO **** %d", selfCursor.intValue);
       
       // SEMAPHORE SIGNAL
-      //dispatch_semaphore_signal(self.sema);
+      if (![[TextCollabrifyClient sharedClient] selfChangeInFlight]) {
+        isSyncing = NO;
+      }
     });
       
   } @catch (NSException *exception) {
@@ -420,7 +427,7 @@ int lastSelectedLocation = 0;
     [[TextCollabrifyClient sharedClient] deleteSession];
     
     // SEMAPHORE SIGNAL
-    //dispatch_semaphore_signal(self.sema);
+    isSyncing = NO;
   }
 }
 

@@ -19,7 +19,7 @@
 @end
 
 
-NSString* SESSION_NAME = @"bfdfladfdfbdkslkjzzl";
+NSString* SESSION_NAME = @"bfdfladfdfbdkslkjzzzb";
 NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
 
 @implementation TextCollabrifyClient
@@ -46,6 +46,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
                                        getLatestEvent:NO
                                                 error:&err];
     _incomingActions = [[Deque alloc] init];
+    _selfChangeInFlight = NO;
     
     [self.client setDelegate:self];
     [self.client setDataSource:self];
@@ -155,7 +156,10 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
   
   if (submissionID == -1) {
     NSLog(@"Error broadcasting.");
+    return;
   }
+  
+  self.selfChangeInFlight = YES;
 }
 
 
@@ -186,6 +190,10 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
       
       [self.incomingActions pushBack:textAction];
     }
+  }
+  
+  if (editSeries->user() == self.client.participantID) {
+    self.selfChangeInFlight = NO;
   }
   
   // Create a dictionary to hold the finished edits.

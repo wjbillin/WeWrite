@@ -15,6 +15,7 @@
 
 @property (nonatomic, retain) CollabrifyClient* client;
 @property (nonatomic, retain) Deque *incomingActions;
+@property (nonatomic, assign) BOOL selfChangeInFlight;
 
 + (id)sharedClient;
 
