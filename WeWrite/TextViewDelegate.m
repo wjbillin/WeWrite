@@ -12,8 +12,9 @@
 #import "TextCollabrifyClient.h"
 #import "TextViewDelegate.h"
 
-BOOL cursorChangeFromInput = NO;
-BOOL textChangeFromInput = NO;
+int cursorChangeFromInput = 0;
+int textChangeFromInput = 0;
+
 int lastSelectedLocation = 0;
 
 @interface TextViewDelegate ()
@@ -31,6 +32,8 @@ int lastSelectedLocation = 0;
     _timer = [[NSTimer alloc] init];
     _globalTruthText = [NSMutableString stringWithString:@""];
     _userCursors = [[NSMutableDictionary alloc] init];
+    
+    _sema = dispatch_semaphore_create(0);
   }
 
   return self;
@@ -40,12 +43,13 @@ int lastSelectedLocation = 0;
     shouldChangeTextInRange:(NSRange)range
             replacementText:(NSString *)text {
   
-  if (textChangeFromInput) {
+  /*if (textChangeFromInput) {
     // On iOS 7, this callback is fired for programatic text inserts. On iOS 6, it is not.
     // Kindly f**k yourself, Apple.
     NSLog(@"throwing out text change notification");
+    textChangeFromInput = NO;
     return YES;
-  }
+  }*/
   
   NSLog(@"Delegate called, location: %d, length: %d, selected location: %d, text is [%@]",
         range.location,
@@ -82,7 +86,10 @@ int lastSelectedLocation = 0;
   
   if ([[UIDevice currentDevice] systemVersion].intValue > 6) {
     NSLog(@"changing cursor from input to YES");
-    cursorChangeFromInput = YES;
+    cursorChangeFromInput++;
+    if (range.length > 0 && text.length >0) {
+      cursorChangeFromInput++;
+    }
   }
   
   // Clear the redo stack if we're editing.
@@ -124,13 +131,15 @@ int lastSelectedLocation = 0;
 
   CursorAction *cursorAction = [[CursorAction alloc] initWithPosition:textView.selectedRange.location
                                                                  user:-1];
-  if (cursorChangeFromInput ||
+  
+  NSLog(@"cursor change from input %d", cursorChangeFromInput);
+  if (cursorChangeFromInput > 0 ||
       textView.selectedRange.location == lastSelectedLocation ||
       textView.selectedRange.location > 100000000) {
     // For some reason iOS likes to send a HUGE number as the selected range location on the first
     // click in the text view.
     NSLog(@"throwing out cursor movement");
-    cursorChangeFromInput = NO;
+    if(cursorChangeFromInput > 0) --cursorChangeFromInput;
     lastSelectedLocation = textView.selectedRange.location;
     return;
   } else if (self.currentEdit.size && [[self.currentEdit front] isKindOfClass:[TextAction class]]) {
@@ -160,6 +169,9 @@ int lastSelectedLocation = 0;
   }
   
   // SEMAPHORE WAIT
+  //NSLog(@"starting the wait");
+  //dispatch_semaphore_wait(self.sema, dispatch_time(DISPATCH_TIME_NOW, 1*NSEC_PER_SEC));
+  //NSLog(@"done with the wait");
   
   // First, merge individual edits (usually insert/remove a single char) into group edits.
   Deque *mergedEdits = [self mergeSingleEdits];
@@ -235,7 +247,7 @@ int lastSelectedLocation = 0;
   Deque *finalEdits = [[Deque alloc] init];
   
   CursorAction *cursorMoved = nil;
-  while ([[mergedEdits back] isKindOfClass:[CursorAction class]]) {
+  while ([[mergedEdits front] isKindOfClass:[CursorAction class]]) {
     // throw out mult. cursor moves in a row
     cursorMoved = [mergedEdits popFront];
   }
@@ -249,8 +261,17 @@ int lastSelectedLocation = 0;
     
     [finalEdits pushBack:curAction];
     
-    while ((curAction = [mergedEdits popFront])) {
+    while ([mergedEdits size]) {
       TextAction* lastAction = [finalEdits back];
+      
+      // get rid of all bad cursor moves
+      if([[mergedEdits front] isKindOfClass:[CursorAction class]]) {
+        [mergedEdits popFront];
+        NSLog(@"ERROR, intertwined cursor moves...");
+        continue;
+      }
+      curAction = [mergedEdits popFront];
+      
       
       if (curAction.editType == REMOVE) {
         if (curAction.range.location < smallestIndex) {
@@ -371,7 +392,7 @@ int lastSelectedLocation = 0;
         }
       }
     }
-      
+    
     dispatch_async(dispatch_get_main_queue(), ^{
       NSLog(@"calling dispatch async");
       [textView setText:[NSString stringWithString:self.globalTruthText]];
@@ -380,16 +401,18 @@ int lastSelectedLocation = 0;
       NSNumber* user = [NSNumber numberWithInt:[textClient getSelfID]];
       NSNumber* selfCursor = [self.userCursors objectForKey:user];
       
-      // avoid cyclical cursor movement -> callback -> action loop.
+      /* avoid cyclical cursor movement -> callback -> action loop.
       if ([[UIDevice currentDevice] systemVersion].intValue > 6) {
         NSLog(@"changing cursor, text from input to YES");
         textChangeFromInput = YES;
-      }
-      cursorChangeFromInput = YES;
+      }*/
+      ++cursorChangeFromInput;
       
       textView.selectedRange = NSMakeRange(selfCursor.intValue, 0);
+      NSLog(@"MOVING CURSOR TO **** %d", selfCursor.intValue);
       
       // SEMAPHORE SIGNAL
+      //dispatch_semaphore_signal(self.sema);
     });
       
   } @catch (NSException *exception) {
@@ -397,6 +420,7 @@ int lastSelectedLocation = 0;
     [[TextCollabrifyClient sharedClient] deleteSession];
     
     // SEMAPHORE SIGNAL
+    //dispatch_semaphore_signal(self.sema);
   }
 }
 
@@ -405,6 +429,12 @@ int lastSelectedLocation = 0;
   int leftIndex = textAction.range.location - textAction.range.length;
   int rightIndex = (textAction.editType == REMOVE) ?
   textAction.range.location : textAction.range.location + textAction.text.length;
+  
+  // If the user's cursor doesn't exist yet, plop it in.
+  if (![self.userCursors objectForKey:[NSNumber numberWithInt:textAction.user]]) {
+    [self.userCursors setObject:[NSNumber numberWithInt:leftIndex]
+                         forKey:[NSNumber numberWithInt:textAction.user]];
+  }
   
   for (id key in [self.userCursors allKeys]) {
     NSNumber* location = [self.userCursors objectForKey:key];
@@ -487,6 +517,7 @@ int lastSelectedLocation = 0;
         rangeToDelete.location,
         rangeToDelete.length);
   
+  // TODO: this range can be out of bounds ? ... it was throwing errors (sema may fix)
   if (![[self.globalTruthText substringWithRange:rangeToDelete] isEqualToString:action.text]) {
     return NO;
   }
