@@ -280,6 +280,11 @@
 			attributes = {
 				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "William Joshua Billingham";
+				TargetAttributes = {
+					B3709DD317E146C300FAEE34 = {
+						DevelopmentTeam = WK4AXX367F;
+					};
+				};
 			};
 			buildConfigurationList = B3709DCF17E146C300FAEE34 /* Build configuration list for PBXProject "WeWrite" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -462,6 +467,8 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
@@ -479,6 +486,7 @@
 					"$(SRCROOT)/protobuf/protobuf-2.5.0/src/.libs",
 				);
 				PRODUCT_NAME = "Cœdit";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -489,6 +497,8 @@
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
@@ -506,6 +516,7 @@
 					"$(SRCROOT)/protobuf/protobuf-2.5.0/src/.libs",
 				);
 				PRODUCT_NAME = "Cœdit";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
