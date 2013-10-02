@@ -232,8 +232,7 @@ int lastSelectedLocation = 0;
   int smallestIndex, ogCursorIndex;
   smallestIndex = ogCursorIndex = curAction.range.location;
   
-  [finalEdits push:curAction];
-
+  [finalEdits pushBack:curAction];
   
   while ((curAction = [mergedEdits popQueue])) {
     TextAction* lastAction = [finalEdits front];
