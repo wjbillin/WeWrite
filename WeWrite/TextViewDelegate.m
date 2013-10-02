@@ -42,7 +42,7 @@ int lastSelectedLocation = 0;
   
   if (textChangeFromInput) {
     // On iOS 7, this callback is fired for programatic text inserts. On iOS 6, it is not.
-    // Kindly fuck yourself, Apple.
+    // Kindly f**k yourself, Apple.
     NSLog(@"throwing out text change notification");
     return YES;
   }
@@ -102,7 +102,7 @@ int lastSelectedLocation = 0;
     // you select 'to' and press backspace, iOS decides to delete 'to' as well as the space preceding
     // 'to', WITHOUT giving us any indication that it has done this. Making it even worse, sometimes
     // it does NOT delete the space before 'to' (if you select 'to', click and hold on left blue selection
-    // marker but DO NOT change the position of the marker, and then press delete). Bullshit. Luckily,
+    // marker but DO NOT change the position of the marker, and then press delete). Bull. Luckily,
     // we can use this callback (in which the deletion action has just been applied to the text view),
     // and examine the position of the cursor to determine if the space was wiped out or not.
     
@@ -127,7 +127,7 @@ int lastSelectedLocation = 0;
   if (cursorChangeFromInput ||
       textView.selectedRange.location == lastSelectedLocation ||
       textView.selectedRange.location > 100000000) {
-    // For some reason iOS likes to send a HUGE fuckin number as the selected range location on the first
+    // For some reason iOS likes to send a HUGE number as the selected range location on the first
     // click in the text view.
     NSLog(@"throwing out cursor movement");
     cursorChangeFromInput = NO;
@@ -288,7 +288,7 @@ int lastSelectedLocation = 0;
       } else if (curAction.editType == INSERT) {
         if (!lastAction || lastAction.editType == REMOVE) {
           [finalEdits pushBack:curAction];
-          // TODO: Optimize, if they re-type the same shit.
+          // TODO: Optimize, if they re-type the same crap.
         } else {
           lastAction.text = [lastAction.text stringByAppendingString:curAction.text];
         }
@@ -473,7 +473,7 @@ int lastSelectedLocation = 0;
   }
 }
 
-// We care about delete's that try to delete shit that isn't there.
+// We care about delete's that try to delete crap that isn't there.
 - (BOOL)verifyEdit:(TextAction *)action {
   // All inserts are OK.
   if (action.editType == INSERT) {
