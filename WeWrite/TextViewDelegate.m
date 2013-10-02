@@ -221,12 +221,19 @@ int lastSelectedLocation = 0;
   
   Deque *finalEdits = [[Deque alloc] init];
   
+  CursorAction *cursorMoved = nil;
+  while ([[mergedEdits back] isKindOfClass:[CursorAction class]]) {
+    // throw out mult. cursor moves in a row
+    cursorMoved = [mergedEdits popQueue];
+  }
+  
   // Initialize invariants.
   TextAction *curAction = [mergedEdits popQueue];
   int smallestIndex, ogCursorIndex;
   smallestIndex = ogCursorIndex = curAction.range.location;
   
   [finalEdits push:curAction];
+
   
   while ((curAction = [mergedEdits popQueue])) {
     TextAction* lastAction = [finalEdits front];
@@ -273,6 +280,8 @@ int lastSelectedLocation = 0;
       }
     }
   }
+  
+  if(cursorMoved != nil) [finalEdits pushFront:cursorMoved];
   
   return finalEdits;
 }
