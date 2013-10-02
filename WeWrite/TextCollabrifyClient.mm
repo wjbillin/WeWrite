@@ -165,7 +165,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
       // This is a cursor movement.
       CursorAction *cursorAction = [self.incomingActions popQueue];
       
-      [finishedUpdates push:cursorAction];
+      [finishedUpdates pushBack:cursorAction];
     } else {
       // Text action. Figure out the location/length of this text edit.
       TextAction *textAction = [self.incomingActions popQueue];
@@ -179,7 +179,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
       
       [self updateCursors:textAction];
       
-      [finishedUpdates push:textAction];
+      [finishedUpdates pushBack:textAction];
     }
   }
   
@@ -233,14 +233,14 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
       CursorAction *cursorAction =
           [[CursorAction alloc] initWithPosition:edit.location() user:editSeries->user()];
       
-      [self.incomingActions push:cursorAction];
+      [self.incomingActions pushBack:cursorAction];
     } else {
       EditType type = (edit.type() == Edit_ChangeType_INSERT) ? INSERT : REMOVE;
       NSString* text = [NSString stringWithCString:edit.text().c_str() encoding:NSASCIIStringEncoding];
       TextAction *textAction =
           [[TextAction alloc] initWithUser:editSeries->user() text:text editType:type];
       
-      [self.incomingActions push:textAction];
+      [self.incomingActions pushBack:textAction];
     }
   }
   

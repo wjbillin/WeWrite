@@ -18,7 +18,8 @@
 - (id)back;
 - (id)popQueue;
 - (id)popStack;
-- (void)push:(id)object;
+- (void)pushBack:(id)object;
+- (void)pushFront:(id)object;
 - (NSUInteger)size;
 
 @end

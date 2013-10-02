@@ -34,8 +34,16 @@
   return (self.array.count > 0) ? [self.array objectAtIndex:0] : nil;
 }
 
-- (void)push:(id)object {
+- (void)pushBack:(id)object {
   [self.array addObject:object];
+}
+
+- (void)pushFront:(id)object {
+  if (self.array.count) {
+    [self.array insertObject:object atIndex:0];
+  } else {
+    [self.array addObject:object];
+  }
 }
 
 - (id)popStack {
