@@ -9,8 +9,10 @@ message Edit {
  // Only for text actions (remove/delete).
   optional string text = 2;
   
- // Only for cursor position changes.
+ // For cursor position changes and undo locations.
   optional int32 location = 3;
+  
+ optional bool isUndo = 4;
 }
 
 message EditSeries {

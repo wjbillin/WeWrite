@@ -10,6 +10,13 @@
 
 @implementation Deque
 
++ (Deque *)dequeWithDeque:(Deque *)dequeCopy {
+  Deque* returnDeque = [[Deque alloc] init];
+  returnDeque.array = [NSMutableArray arrayWithArray:dequeCopy.array];
+  
+  return returnDeque;
+}
+
 - (id)init {
   if (self = [super init]) {
     _array = [[NSMutableArray alloc] init];
@@ -26,11 +33,11 @@
   return (self.array.count == 0);
 }
 
-- (id)front {
+- (id)back {
   return [self.array lastObject];
 }
 
-- (id)back {
+- (id)front {
   return (self.array.count > 0) ? [self.array objectAtIndex:0] : nil;
 }
 
@@ -46,7 +53,7 @@
   }
 }
 
-- (id)popStack {
+- (id)popBack {
   id lastObject = [self.array lastObject];
   if (lastObject) {
     [self.array removeObject:lastObject];
@@ -55,7 +62,7 @@
   return lastObject;
 }
 
-- (id)popQueue {
+- (id)popFront {
   id firstObject = nil;
   
   if (self.array.count) {

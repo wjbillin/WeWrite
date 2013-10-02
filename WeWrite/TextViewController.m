@@ -98,11 +98,11 @@
 }
 
 - (void)undo {
-  [self.delegate undo:self.textView];
+  [self.delegate undo];
 }
 
 - (void)redo {
-  [self.delegate redo:self.textView];
+  [self.delegate redo];
 }
 
 - (void)exit {

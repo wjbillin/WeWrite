@@ -22,11 +22,12 @@
 @property (nonatomic, retain) NSTimer *timer;
 
 @property (nonatomic, retain) NSMutableString* globalTruthText;
+@property (nonatomic, retain) NSMutableDictionary* userCursors;
 
 - (id)init;
 - (void)mergeCurrentEdit;
 - (void)renderIncomingEdits:(NSNotification *)notification textView:(UITextView *)textView;
-- (void)undo:(UITextView *)textView;
-- (void)redo:(UITextView *)textView;
+- (void)undo;
+- (void)redo;
 
 @end

@@ -54,6 +54,8 @@
     _range = range;
     _text = text;
     _editType = [self type:range];
+    _isUndo = NO;
+    _isRedo = NO;
   }
   return self;
 }
@@ -64,6 +66,8 @@
     _range = NSMakeRange(0, 0);
     _text = text;
     _editType = type;
+    _isUndo = NO;
+    _isRedo = NO;
   }
   
   return self;

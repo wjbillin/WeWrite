@@ -162,6 +162,13 @@ class Edit : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 location() const;
   inline void set_location(::google::protobuf::int32 value);
 
+  // optional bool isUndo = 4;
+  inline bool has_isundo() const;
+  inline void clear_isundo();
+  static const int kIsUndoFieldNumber = 4;
+  inline bool isundo() const;
+  inline void set_isundo(bool value);
+
   // @@protoc_insertion_point(class_scope:Edit)
  private:
   inline void set_has_type();
@@ -170,15 +177,18 @@ class Edit : public ::google::protobuf::Message {
   inline void clear_has_text();
   inline void set_has_location();
   inline void clear_has_location();
+  inline void set_has_isundo();
+  inline void clear_has_isundo();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* text_;
   int type_;
   ::google::protobuf::int32 location_;
+  bool isundo_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_text_2eproto();
   friend void protobuf_AssignDesc_text_2eproto();
@@ -402,6 +412,28 @@ inline ::google::protobuf::int32 Edit::location() const {
 inline void Edit::set_location(::google::protobuf::int32 value) {
   set_has_location();
   location_ = value;
+}
+
+// optional bool isUndo = 4;
+inline bool Edit::has_isundo() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void Edit::set_has_isundo() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void Edit::clear_has_isundo() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void Edit::clear_isundo() {
+  isundo_ = false;
+  clear_has_isundo();
+}
+inline bool Edit::isundo() const {
+  return isundo_;
+}
+inline void Edit::set_isundo(bool value) {
+  set_has_isundo();
+  isundo_ = value;
 }
 
 // -------------------------------------------------------------------

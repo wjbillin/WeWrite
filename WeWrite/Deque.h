@@ -11,13 +11,14 @@
 @interface Deque : NSObject
 
 @property (nonatomic, retain) NSMutableArray *array;
++ (Deque *)dequeWithDeque:(Deque *)dequeCopy;
 
 - (void)clear;
 - (BOOL)empty;
 - (id)front;
 - (id)back;
-- (id)popQueue;
-- (id)popStack;
+- (id)popFront;
+- (id)popBack;
 - (void)pushBack:(id)object;
 - (void)pushFront:(id)object;
 - (NSUInteger)size;
