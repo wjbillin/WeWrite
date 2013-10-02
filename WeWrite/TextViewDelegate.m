@@ -115,8 +115,11 @@ int lastSelectedLocation = 0;
 
   CursorAction *cursorAction = [[CursorAction alloc] initWithPosition:textView.selectedRange.location
                                                                  user:-1];
-  
-  if (selectionChangeFromInput || textView.selectedRange.location == lastSelectedLocation) {
+  if (selectionChangeFromInput ||
+      textView.selectedRange.location == lastSelectedLocation ||
+      textView.selectedRange.location > 100000000) {
+    // For some reason iOS likes to send a HUGE fuckin number as the selected range location on the first
+    // click in the text view.
     selectionChangeFromInput = NO;
     lastSelectedLocation = textView.selectedRange.location;
     return;
