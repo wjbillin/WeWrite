@@ -113,22 +113,28 @@ int lastSelectedLocation = 0;
 - (void)textViewDidChangeSelection:(UITextView *)textView {
   NSLog(@"text view did change selection, location: %d, length: %d", textView.selectedRange.location, textView.selectedRange.length);
 
+  CursorAction *cursorAction = [[CursorAction alloc] initWithPosition:textView.selectedRange.location
+                                                                 user:-1];
+  
   if (selectionChangeFromInput || textView.selectedRange.location == lastSelectedLocation) {
     selectionChangeFromInput = NO;
-  } else {
-    NSLog(@"invalidating timer from cursor change");
-    
-    // Push cursor movement onto current edit. Bogus user since this is a local change - we'll set
-    // the user right before we sent this series of actions.
-    CursorAction *cursorAction = [[CursorAction alloc] initWithPosition:textView.selectedRange.location
-                                                                   user:-1];
-    [self.currentEdit push:cursorAction];
-  
+    lastSelectedLocation = textView.selectedRange.location;
+    return;
+  } else if (self.currentEdit.size) {
+    // There exists a current edit. Sync up with the server. Cancel any running timer.
     if (self.timer.isValid) {
       [self.timer invalidate];
     }
+    
     [self mergeCurrentEdit];
   }
+  
+  // Start the timer again. This is the start of a new edit series.
+  [self resetTimer];
+  
+  // Push cursor movement onto current edit. Bogus user since this is a local change - we'll set
+  // the user right before we broadcast this series of actions.
+  [self.currentEdit push:cursorAction];
   
   lastSelectedLocation = textView.selectedRange.location;
 }
@@ -139,6 +145,8 @@ int lastSelectedLocation = 0;
   if ([self.currentEdit empty]) {
     return;
   }
+  
+  // SEMAPHORE WAIT
   
   // First, merge individual edits (usually insert/remove a single char) into group edits.
   Deque *mergedEdits = [self mergeSingleEdits];
@@ -152,18 +160,8 @@ int lastSelectedLocation = 0;
   // Debug print.
   [self printQueue:finalEdits];
   
-  // Deque to pass to collab client
-  Deque *sendableUpdates = [[Deque alloc] init];
-  
-  // Put the actions in the undo stack.
-  TextAction *curAction;
-  while ((curAction = [finalEdits popQueue])) {
-    [self.undoStack push:curAction];
-    [sendableUpdates push:curAction];
-  }
-  
   // notify collab client of changes
-  [[TextCollabrifyClient sharedClient] sendActions:sendableUpdates];
+  [[TextCollabrifyClient sharedClient] sendActionsAndSync:finalEdits];
 }
 
 // Merge a series of single edits (i.e. (INSERT, {0,0}, 'h'), (INSERT, {1,0}, 'i')) into a series of merged
@@ -282,12 +280,12 @@ int lastSelectedLocation = 0;
 // We've received other people's changes. Insert them into the text view.
 - (void)renderIncomingEdits:(NSNotification *)notification textView:(UITextView *)textView {
   NSLog(@"TIME TO RENDER THE NEW EVENTS");
-  Deque *incomingEdits = [[notification userInfo] objectForKey:renderUpdatesDictName];
+  Deque *renderableEdits = [[notification userInfo] objectForKey:renderUpdatesDictName];
   
   @try {
     
   TextAction *action;
-  while ((action = [incomingEdits popQueue])) {
+  while ((action = [renderableEdits popQueue])) {
     NSLog(@"text: %@, type: %@, location: %d, length: %d",
           action.text,
           (action.editType) ? @"REMOVE" : @"INSERT",
@@ -305,9 +303,8 @@ int lastSelectedLocation = 0;
   }
     
   dispatch_async(dispatch_get_main_queue(), ^{
-    NSLog(@"called dispatch async");
-    NSString* globalCopy = [NSString stringWithString:self.globalTruthText];
-    [textView setText:globalCopy];
+    NSLog(@"calling dispatch async");
+    [textView setText:[NSString stringWithString:self.globalTruthText]];
 
     TextCollabrifyClient *textClient = [TextCollabrifyClient sharedClient];
     NSNumber* user = [NSNumber numberWithInt:textClient.client.participantID];
@@ -317,11 +314,15 @@ int lastSelectedLocation = 0;
     // loop.
     selectionChangeFromInput = YES;
     textView.selectedRange = NSMakeRange(selfCursor.intValue, 0);
+    
+    // SEMAPHORE SIGNAL
   });
     
   } @catch (NSException *exception) {
     NSLog(@" *** Exception thrown *** - \n %@", exception.reason);
     [[TextCollabrifyClient sharedClient] deleteSession];
+    
+    // SEMAPHORE SIGNAL
   }
 }
 
