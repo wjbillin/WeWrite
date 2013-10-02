@@ -17,9 +17,10 @@ int textChangeFromInput = 0;
 
 int lastSelectedLocation = 0;
 
-BOOL isSyncing = NO;
-
 @interface TextViewDelegate ()
+
+@property (nonatomic, assign) BOOL isSyncing;
+@property (nonatomic, retain) Deque *syncBuffer;
 
 @end
 
@@ -34,6 +35,9 @@ BOOL isSyncing = NO;
     _timer = [[NSTimer alloc] init];
     _globalTruthText = [NSMutableString stringWithString:@""];
     _userCursors = [[NSMutableDictionary alloc] init];
+    
+    _isSyncing = NO;
+    _syncBuffer = [[Deque alloc] init];
   }
 
   return self;
@@ -52,7 +56,9 @@ BOOL isSyncing = NO;
   }*/
   
 
-  if (isSyncing) {
+  if (self.isSyncing) {
+    TextAction *action = [[TextAction alloc] initWithRange:range text:text];
+    [self.syncBuffer pushBack:action];
     return NO;
   }
   
@@ -176,7 +182,7 @@ BOOL isSyncing = NO;
   }
   
   // SEMAPHORE WAIT
-  isSyncing = YES;
+  self.isSyncing = YES;
   
   // First, merge individual edits (usually insert/remove a single char) into group edits.
   Deque *mergedEdits = [self mergeSingleEdits];
@@ -326,6 +332,47 @@ BOOL isSyncing = NO;
   return finalEdits;
 }
 
+- (void)applyBufferedEdits:(UITextView *)textView {
+  if ([self.syncBuffer empty]) {
+    self.isSyncing = NO;
+    NSLog(@"sync buffer is empty");
+    return;
+  }
+  
+  NSLog(@"sync buffer is not empty");
+  
+  NSMutableString* text = [NSMutableString stringWithString:textView.text];
+  
+  TextAction *action;
+  int cursor = textView.selectedRange.location;
+  int offset = 0;
+  while ((action = [self.syncBuffer popFront])) {
+    NSLog(@"popping off the buffer");
+    if (action.range.length) {
+      // This is a delete.
+      action.range = NSMakeRange((cursor - 1) + offset, action.range.length);
+      --offset;
+    } else {
+      // This is an insert.
+      action.range = NSMakeRange(cursor + offset, action.range.length);
+      ++offset;
+    }
+    if (action.range.length) {
+      // Delete.
+      action.text = [text substringWithRange:action.range];
+      [text deleteCharactersInRange:action.range];
+    } else {
+      [text insertString:action.text atIndex:action.range.location];
+    }
+    
+    [self.currentEdit pushBack:action];
+  }
+  
+  [textView setText:text];
+  textView.selectedRange = NSMakeRange(cursor + offset, 0);
+  self.isSyncing = NO;
+}
+
 // We've received other people's changes. Insert them into the text view.
 - (void)renderIncomingEdits:(NSNotification *)notification textView:(UITextView *)textView {
   NSLog(@"TIME TO RENDER THE NEW EVENTS");
@@ -418,7 +465,7 @@ BOOL isSyncing = NO;
       
       // SEMAPHORE SIGNAL
       if (![[TextCollabrifyClient sharedClient] selfChangeInFlight]) {
-        isSyncing = NO;
+        [self applyBufferedEdits:textView];
       }
     });
       
@@ -427,7 +474,7 @@ BOOL isSyncing = NO;
     [[TextCollabrifyClient sharedClient] deleteSession];
     
     // SEMAPHORE SIGNAL
-    isSyncing = NO;
+    self.isSyncing = NO;
   }
 }
 
