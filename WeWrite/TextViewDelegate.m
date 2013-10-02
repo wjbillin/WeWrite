@@ -52,20 +52,20 @@ int lastSelectedLocation = 0;
   if (range.length > 0 && text.length == 0) {
     // This action is a delete. Find out what characters were deleted.
     NSString *deletedText = [textView.text substringWithRange:range];
-    [self.currentEdit push:[[TextAction alloc] initWithRange:range text:deletedText]];
+    [self.currentEdit pushBack:[[TextAction alloc] initWithRange:range text:deletedText]];
   } else if (range.length > 0 && text.length > 0) {
     // This action is an autocomplete/correct. Split it up into a remove and an addition.
     NSString* deletedText = [textView.text substringWithRange:range];
     
-    // Push on the remove.
-    [self.currentEdit push:[[TextAction alloc] initWithRange:range text:deletedText]];
+    // pushBack on the remove.
+    [self.currentEdit pushBack:[[TextAction alloc] initWithRange:range text:deletedText]];
     
     // Push on the add.
-    [self.currentEdit push:[[TextAction alloc] initWithRange:NSMakeRange(range.location, 0)
+    [self.currentEdit pushBack:[[TextAction alloc] initWithRange:NSMakeRange(range.location, 0)
                                                              text:text]];
   } else {
     // This action is an add.
-    [self.currentEdit push:[[TextAction alloc] initWithRange:range text:text]];
+    [self.currentEdit pushBack:[[TextAction alloc] initWithRange:range text:text]];
   }
   
   // If the timer is currently running, we want to stop it before scheduling it again.
@@ -120,7 +120,7 @@ int lastSelectedLocation = 0;
     selectionChangeFromInput = NO;
     lastSelectedLocation = textView.selectedRange.location;
     return;
-  } else if (self.currentEdit.size) {
+  } else if (self.currentEdit.size && [[self.currentEdit front] isKindOfClass:[TextAction class]]) {
     // There exists a current edit. Sync up with the server. Cancel any running timer.
     if (self.timer.isValid) {
       [self.timer invalidate];
@@ -134,7 +134,7 @@ int lastSelectedLocation = 0;
   
   // Push cursor movement onto current edit. Bogus user since this is a local change - we'll set
   // the user right before we broadcast this series of actions.
-  [self.currentEdit push:cursorAction];
+  [self.currentEdit pushBack:cursorAction];
   
   lastSelectedLocation = textView.selectedRange.location;
 }
@@ -175,7 +175,7 @@ int lastSelectedLocation = 0;
 
   while ((singleEdit = [self.currentEdit popQueue])) {
     if ([singleEdit isKindOfClass:[CursorAction class]]) {
-      [mergedEdits push:singleEdit];
+      [mergedEdits pushBack:singleEdit];
       currentMergedEdit = singleEdit;
       continue;
     }
@@ -185,7 +185,7 @@ int lastSelectedLocation = 0;
         [currentMergedEdit isKindOfClass:[CursorAction class]] ||
         singleTextEdit.editType != ((TextAction *)currentMergedEdit).editType) {
       // This is the first action or the actions are different.
-      [mergedEdits push:singleEdit];
+      [mergedEdits pushBack:singleEdit];
       currentMergedEdit = singleEdit;
     } else {
       // The actions are of the same type. Merge them.
@@ -260,7 +260,7 @@ int lastSelectedLocation = 0;
         }
         
         [finalEdits clear];
-        [finalEdits push:curAction];
+        [finalEdits pushBack:curAction];
         smallestIndex = curAction.range.location;
       } else {
         lastAction.text =
@@ -273,7 +273,7 @@ int lastSelectedLocation = 0;
       }
     } else if (curAction.editType == INSERT) {
       if (!lastAction || lastAction.editType == REMOVE) {
-        [finalEdits push:curAction];
+        [finalEdits pushBack:curAction];
         // TODO: Optimize, if they re-type the same shit.
       } else {
         lastAction.text = [lastAction.text stringByAppendingString:curAction.text];
@@ -357,7 +357,7 @@ int lastSelectedLocation = 0;
   } else {
     [self undoAdd:lastAction textView:textView];
   }
-  [self.redoStack push:lastAction];
+  [self.redoStack pushBack:lastAction];
   selectionChangeFromInput = YES;
 }
 
@@ -392,7 +392,7 @@ int lastSelectedLocation = 0;
   } else {
     [self redoAdd:undidAction textView:textView];
   }
-  [self.undoStack push:undidAction];
+  [self.undoStack pushBack:undidAction];
 }
 
 - (void)redoAdd:(TextAction *)textAction textView:(UITextView *)textView {
@@ -434,7 +434,7 @@ int lastSelectedLocation = 0;
           action.range.location,
           action.range.length,
           action.text);
-    [deque push:action];
+    [deque pushBack:action];
   }
 }
 
