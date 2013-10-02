@@ -12,8 +12,9 @@
 #import "TextCollabrifyClient.h"
 #import "TextViewDelegate.h"
 
-BOOL cursorChangeFromInput = NO;
-BOOL textChangeFromInput = NO;
+int cursorChangeFromInput = 0;
+int textChangeFromInput = 0;
+
 int lastSelectedLocation = 0;
 
 @interface TextViewDelegate ()
@@ -40,12 +41,13 @@ int lastSelectedLocation = 0;
     shouldChangeTextInRange:(NSRange)range
             replacementText:(NSString *)text {
   
-  if (textChangeFromInput) {
+  /*if (textChangeFromInput) {
     // On iOS 7, this callback is fired for programatic text inserts. On iOS 6, it is not.
     // Kindly fuck yourself, Apple.
     NSLog(@"throwing out text change notification");
+    textChangeFromInput = NO;
     return YES;
-  }
+  }*/
   
   NSLog(@"Delegate called, location: %d, length: %d, selected location: %d, text is [%@]",
         range.location,
@@ -82,7 +84,10 @@ int lastSelectedLocation = 0;
   
   if ([[UIDevice currentDevice] systemVersion].intValue > 6) {
     NSLog(@"changing cursor from input to YES");
-    cursorChangeFromInput = YES;
+    cursorChangeFromInput++;
+    if (range.length > 0 && text.length >0) {
+      cursorChangeFromInput++;
+    }
   }
   
   // Clear the redo stack if we're editing.
@@ -124,13 +129,15 @@ int lastSelectedLocation = 0;
 
   CursorAction *cursorAction = [[CursorAction alloc] initWithPosition:textView.selectedRange.location
                                                                  user:-1];
-  if (cursorChangeFromInput ||
+  
+  NSLog(@"cursor change from input %d", cursorChangeFromInput);
+  if (cursorChangeFromInput > 0 ||
       textView.selectedRange.location == lastSelectedLocation ||
       textView.selectedRange.location > 100000000) {
     // For some reason iOS likes to send a HUGE fuckin number as the selected range location on the first
     // click in the text view.
     NSLog(@"throwing out cursor movement");
-    cursorChangeFromInput = NO;
+    --cursorChangeFromInput;
     lastSelectedLocation = textView.selectedRange.location;
     return;
   } else if (self.currentEdit.size && [[self.currentEdit front] isKindOfClass:[TextAction class]]) {
@@ -380,12 +387,12 @@ int lastSelectedLocation = 0;
       NSNumber* user = [NSNumber numberWithInt:[textClient getSelfID]];
       NSNumber* selfCursor = [self.userCursors objectForKey:user];
       
-      // avoid cyclical cursor movement -> callback -> action loop.
+      /* avoid cyclical cursor movement -> callback -> action loop.
       if ([[UIDevice currentDevice] systemVersion].intValue > 6) {
         NSLog(@"changing cursor, text from input to YES");
         textChangeFromInput = YES;
       }
-      cursorChangeFromInput = YES;
+      cursorChangeFromInput = YES;*/
       
       textView.selectedRange = NSMakeRange(selfCursor.intValue, 0);
       
@@ -405,6 +412,12 @@ int lastSelectedLocation = 0;
   int leftIndex = textAction.range.location - textAction.range.length;
   int rightIndex = (textAction.editType == REMOVE) ?
   textAction.range.location : textAction.range.location + textAction.text.length;
+  
+  // If the user's cursor doesn't exist yet, plop it in.
+  if (![self.userCursors objectForKey:[NSNumber numberWithInt:textAction.user]]) {
+    [self.userCursors setObject:[NSNumber numberWithInt:leftIndex]
+                         forKey:[NSNumber numberWithInt:textAction.user]];
+  }
   
   for (id key in [self.userCursors allKeys]) {
     NSNumber* location = [self.userCursors objectForKey:key];
