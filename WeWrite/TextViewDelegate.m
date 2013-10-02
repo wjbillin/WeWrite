@@ -418,8 +418,8 @@ int lastSelectedLocation = 0;
       }
     } else {
       if (location.intValue >= leftIndex) {
-        NSLog(@"moving cursor up");
         location = [NSNumber numberWithInt:(location.intValue + textAction.text.length)];
+        NSLog(@"moving cursor up to %d", location.intValue);
       }
     }
     
