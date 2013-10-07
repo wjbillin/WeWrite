@@ -19,7 +19,7 @@
 @end
 
 
-NSString* SESSION_NAME = @"bfdfladfdfbdkslkjzzzl";
+NSString* SESSION_NAME = @"bfdfladfdfbdkslkjzzzr";
 NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
 
 @implementation TextCollabrifyClient
@@ -197,8 +197,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
   }
   
   // Create a dictionary to hold the finished edits.
-  Deque* incomingActionsCopy = [Deque dequeWithDeque:self.incomingActions];
-  NSDictionary *dict = [[NSDictionary alloc] initWithObjects:@[ incomingActionsCopy ]
+  NSDictionary *dict = [[NSDictionary alloc] initWithObjects:@[ self.incomingActions ]
                                                      forKeys:@[ renderUpdatesDictName ]];
   
   // Notify the text delegate that there are text edits to render.
@@ -206,9 +205,6 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
    postNotification:[NSNotification notificationWithName:renderUpdatesNotificationName
                                                   object:nil
                                                 userInfo:dict]];
-  
-  // Clear the incoming edits.
-  [self.incomingActions clear];
 }
 
 @end

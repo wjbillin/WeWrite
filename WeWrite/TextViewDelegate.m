@@ -350,12 +350,12 @@ int lastSelectedLocation = 0;
     NSLog(@"popping off the buffer");
     if (action.range.length) {
       // This is a delete.
-      action.range = NSMakeRange((cursor - 1) + offset, action.range.length);
-      --offset;
+      action.range = NSMakeRange((cursor - action.range.length) + offset, action.range.length);
+      offset -= action.range.length;
     } else {
       // This is an insert.
       action.range = NSMakeRange(cursor + offset, action.range.length);
-      ++offset;
+      offset += action.text.length;
     }
     if (action.range.length) {
       // Delete.
@@ -375,6 +375,13 @@ int lastSelectedLocation = 0;
 
 // We've received other people's changes. Insert them into the text view.
 - (void)renderIncomingEdits:(NSNotification *)notification textView:(UITextView *)textView {
+  
+  if (self.timer.isValid) {
+    return;
+  }
+  
+  self.isSyncing = YES;
+  
   NSLog(@"TIME TO RENDER THE NEW EVENTS");
   Deque *renderableEdits = [[notification userInfo] objectForKey:renderUpdatesDictName];
   
@@ -445,6 +452,7 @@ int lastSelectedLocation = 0;
       }
     }
     
+    // We're done reading out of the buffer. Let us receive more actions.
     dispatch_async(dispatch_get_main_queue(), ^{
       NSLog(@"calling dispatch async");
       [textView setText:[NSString stringWithString:self.globalTruthText]];
@@ -458,15 +466,13 @@ int lastSelectedLocation = 0;
         NSLog(@"changing cursor from input to YES");
         //++cursorChangeFromInput;
       }
-      ++cursorChangeFromInput;
+      //++cursorChangeFromInput;
       
       textView.selectedRange = NSMakeRange(selfCursor.intValue, 0);
       NSLog(@"MOVING CURSOR TO **** %d", selfCursor.intValue);
       
       // SEMAPHORE SIGNAL
-      if (![[TextCollabrifyClient sharedClient] selfChangeInFlight]) {
-        [self applyBufferedEdits:textView];
-      }
+      [self applyBufferedEdits:textView];
     });
       
   } @catch (NSException *exception) {
