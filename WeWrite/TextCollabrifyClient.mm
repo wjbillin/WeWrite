@@ -19,7 +19,7 @@
 @end
 
 
-NSString* SESSION_NAME = @"bfdfladfdfbdkslkjzzzs";
+NSString* SESSION_NAME = @"bfdfladfdfbdkslkjzzzt";
 NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
 
 @implementation TextCollabrifyClient
@@ -137,6 +137,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
         (textAction.editType == INSERT) ? Edit_ChangeType_INSERT : Edit_ChangeType_REMOVE);
       edit->set_text([textAction.text cStringUsingEncoding:[NSString defaultCStringEncoding]]);
       edit->set_isundo(textAction.isUndo);
+      edit->set_isredo(textAction.isRedo);
       edit->set_location(textAction.range.location);
     } else {
       CursorAction *cursorAction = action;

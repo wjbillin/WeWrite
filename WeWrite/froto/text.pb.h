@@ -169,6 +169,13 @@ class Edit : public ::google::protobuf::Message {
   inline bool isundo() const;
   inline void set_isundo(bool value);
 
+  // optional bool isRedo = 5;
+  inline bool has_isredo() const;
+  inline void clear_isredo();
+  static const int kIsRedoFieldNumber = 5;
+  inline bool isredo() const;
+  inline void set_isredo(bool value);
+
   // @@protoc_insertion_point(class_scope:Edit)
  private:
   inline void set_has_type();
@@ -179,6 +186,8 @@ class Edit : public ::google::protobuf::Message {
   inline void clear_has_location();
   inline void set_has_isundo();
   inline void clear_has_isundo();
+  inline void set_has_isredo();
+  inline void clear_has_isredo();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -186,9 +195,10 @@ class Edit : public ::google::protobuf::Message {
   int type_;
   ::google::protobuf::int32 location_;
   bool isundo_;
+  bool isredo_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_text_2eproto();
   friend void protobuf_AssignDesc_text_2eproto();
@@ -434,6 +444,28 @@ inline bool Edit::isundo() const {
 inline void Edit::set_isundo(bool value) {
   set_has_isundo();
   isundo_ = value;
+}
+
+// optional bool isRedo = 5;
+inline bool Edit::has_isredo() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void Edit::set_has_isredo() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void Edit::clear_has_isredo() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void Edit::clear_isredo() {
+  isredo_ = false;
+  clear_has_isredo();
+}
+inline bool Edit::isredo() const {
+  return isredo_;
+}
+inline void Edit::set_isredo(bool value) {
+  set_has_isredo();
+  isredo_ = value;
 }
 
 // -------------------------------------------------------------------

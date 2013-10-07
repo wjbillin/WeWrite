@@ -642,7 +642,7 @@ int lastSelectedLocation = 0;
                                          editType:INSERT];
     redoAction.range = NSMakeRange(undidAction.range.location - undidAction.range.length, 0);
   }
-  redoAction.isUndo = NO;
+  redoAction.isRedo = YES;
   
   NSLog(@"Popped out redo action: loc: %d, len: %d, text: [%@]",
         redoAction.range.location,

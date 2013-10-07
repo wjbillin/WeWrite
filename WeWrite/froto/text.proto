@@ -13,6 +13,8 @@ message Edit {
   optional int32 location = 3;
   
  optional bool isUndo = 4;
+ 
+ optional bool isRedo = 5;
 }
 
 message EditSeries {

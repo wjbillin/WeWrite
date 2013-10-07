@@ -36,11 +36,12 @@ void protobuf_AssignDesc_text_2eproto() {
       "text.proto");
   GOOGLE_CHECK(file != NULL);
   Edit_descriptor_ = file->message_type(0);
-  static const int Edit_offsets_[4] = {
+  static const int Edit_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Edit, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Edit, text_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Edit, location_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Edit, isundo_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Edit, isredo_),
   };
   Edit_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -104,12 +105,12 @@ void protobuf_AddDesc_text_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\ntext.proto\"\210\001\n\004Edit\022\036\n\004type\030\001 \002(\0162\020.Ed"
+    "\n\ntext.proto\"\230\001\n\004Edit\022\036\n\004type\030\001 \002(\0162\020.Ed"
     "it.ChangeType\022\014\n\004text\030\002 \001(\t\022\020\n\010location\030"
-    "\003 \001(\005\022\016\n\006isUndo\030\004 \001(\010\"0\n\nChangeType\022\n\n\006I"
-    "NSERT\020\000\022\n\n\006REMOVE\020\001\022\n\n\006CURSOR\020\002\"0\n\nEditS"
-    "eries\022\014\n\004user\030\001 \002(\003\022\024\n\005edits\030\002 \003(\0132\005.Edi"
-    "t", 201);
+    "\003 \001(\005\022\016\n\006isUndo\030\004 \001(\010\022\016\n\006isRedo\030\005 \001(\010\"0\n"
+    "\nChangeType\022\n\n\006INSERT\020\000\022\n\n\006REMOVE\020\001\022\n\n\006C"
+    "URSOR\020\002\"0\n\nEditSeries\022\014\n\004user\030\001 \002(\003\022\024\n\005e"
+    "dits\030\002 \003(\0132\005.Edit", 217);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "text.proto", &protobuf_RegisterTypes);
   Edit::default_instance_ = new Edit();
@@ -156,6 +157,7 @@ const int Edit::kTypeFieldNumber;
 const int Edit::kTextFieldNumber;
 const int Edit::kLocationFieldNumber;
 const int Edit::kIsUndoFieldNumber;
+const int Edit::kIsRedoFieldNumber;
 #endif  // !_MSC_VER
 
 Edit::Edit()
@@ -178,6 +180,7 @@ void Edit::SharedCtor() {
   text_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   location_ = 0;
   isundo_ = false;
+  isredo_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -224,6 +227,7 @@ void Edit::Clear() {
     }
     location_ = 0;
     isundo_ = false;
+    isredo_ = false;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -300,6 +304,22 @@ bool Edit::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(40)) goto parse_isRedo;
+        break;
+      }
+
+      // optional bool isRedo = 5;
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_isRedo:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &isredo_)));
+          set_has_isredo();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -347,6 +367,11 @@ void Edit::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->isundo(), output);
   }
 
+  // optional bool isRedo = 5;
+  if (has_isredo()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(5, this->isredo(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -379,6 +404,11 @@ void Edit::SerializeWithCachedSizes(
   // optional bool isUndo = 4;
   if (has_isundo()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->isundo(), target);
+  }
+
+  // optional bool isRedo = 5;
+  if (has_isredo()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(5, this->isredo(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -414,6 +444,11 @@ int Edit::ByteSize() const {
 
     // optional bool isUndo = 4;
     if (has_isundo()) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool isRedo = 5;
+    if (has_isredo()) {
       total_size += 1 + 1;
     }
 
@@ -456,6 +491,9 @@ void Edit::MergeFrom(const Edit& from) {
     if (from.has_isundo()) {
       set_isundo(from.isundo());
     }
+    if (from.has_isredo()) {
+      set_isredo(from.isredo());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -484,6 +522,7 @@ void Edit::Swap(Edit* other) {
     std::swap(text_, other->text_);
     std::swap(location_, other->location_);
     std::swap(isundo_, other->isundo_);
+    std::swap(isredo_, other->isredo_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
