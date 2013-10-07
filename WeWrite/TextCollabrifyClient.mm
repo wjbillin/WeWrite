@@ -187,6 +187,7 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
       TextAction *textAction =
           [[TextAction alloc] initWithUser:editSeries->user() text:text editType:type];
       textAction.isUndo = edit.isundo();
+      textAction.isRedo = edit.isredo();
       textAction.range = NSMakeRange(edit.location(), 0);
       
       [self.incomingActions pushBack:textAction];
