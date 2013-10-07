@@ -589,10 +589,7 @@ int lastSelectedLocation = 0;
 
 - (void)undo {
   
-  // SEMAPHORE WAIT
-  
   if ([self.undoStack empty]) {
-    // SEMAPHORE SIGNAL
     return;
   }
   
@@ -626,15 +623,36 @@ int lastSelectedLocation = 0;
 
 - (void)redo {
   
-  // SEMAPHORE WAIT
-  
   if ([self.redoStack empty]) {
-    // SEMAPHORE SIGNAL
     return;
   }
   
-  //TextAction* redoAction;
-  //TextAction* lastAction;
+  TextAction *redoAction;
+  TextAction *undidAction = [self.redoStack popBack];
+  
+  if (undidAction.editType == INSERT) {
+    redoAction = [[TextAction alloc] initWithUser:undidAction.user
+                                             text:undidAction.text
+                                         editType:REMOVE];
+    redoAction.range = NSMakeRange(undidAction.range.location + undidAction.text.length,
+                                   undidAction.text.length);
+  } else {
+    redoAction = [[TextAction alloc] initWithUser:undidAction.user
+                                             text:undidAction.text
+                                         editType:INSERT];
+    redoAction.range = NSMakeRange(undidAction.range.location - undidAction.range.length, 0);
+  }
+  redoAction.isUndo = NO;
+  
+  NSLog(@"Popped out redo action: loc: %d, len: %d, text: [%@]",
+        redoAction.range.location,
+        redoAction.range.length,
+        redoAction.text);
+  
+  Deque* actions = [[Deque alloc] init];
+  [actions pushBack:redoAction];
+  
+  [[TextCollabrifyClient sharedClient] sendActions:actions];
 }
 
 

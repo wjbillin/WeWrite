@@ -19,7 +19,7 @@
 @end
 
 
-NSString* SESSION_NAME = @"bfdfladfdfbdkslkjzzzr";
+NSString* SESSION_NAME = @"bfdfladfdfbdkslkjzzzs";
 NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
 
 @implementation TextCollabrifyClient
