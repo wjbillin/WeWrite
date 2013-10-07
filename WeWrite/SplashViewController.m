@@ -20,8 +20,13 @@
 {
   if (self = [super init]) {
       // Custom initialization.
-    _joinButton = [[UIButton alloc] init];
     _spinny = [[UIActivityIndicatorView alloc] init];
+    _joinButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(joinedSession)
+                                                 name:@"SESSION_JOINED"
+                                               object:nil];
   }
 
   return self;
@@ -33,8 +38,7 @@
 
   [self.view setBackgroundColor:[UIColor whiteColor]];
   
-  self.joinButton = [UIButton buttonWithType:UIButtonTypeSystem];
-
+  // Configure Join button.
   CGRect screen = [[UIScreen mainScreen] bounds];
   CGRect bounds = [self.view bounds];
   [self.joinButton setFrame:CGRectMake(0, 0, screen.size.width - 50, 50)];
@@ -47,6 +51,7 @@
                       action:@selector(joinSession)
             forControlEvents:UIControlEventTouchUpInside];
   
+  // Create background image.
   UIImage *image = [UIImage imageNamed:@"logo.png"];
   UIImage *scaledImage =
   [UIImage imageWithCGImage:[image CGImage]
@@ -54,25 +59,19 @@
                 orientation:(image.imageOrientation)];
   UIImageView *imageView = [[UIImageView alloc] initWithImage:scaledImage];
   
+  // Configure spinny wheel.
+  self.spinny.center = self.view.center;
+  [self.spinny setColor:[UIColor orangeColor]];
+  
   [imageView setCenter:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 100)];
   
+  [self.view addSubview:self.spinny];
   [self.view addSubview:imageView];
   [self.view addSubview:self.joinButton];
 }
 
-- (void)addSpinny {
-  self.spinny.center = self.view.center;
-  [self.spinny setColor:[UIColor orangeColor]];
-  [self.view addSubview:self.spinny];
-  [self.spinny startAnimating];
-}
-
 - (void)joinSession {
-  [self addSpinny];
-  [[NSNotificationCenter defaultCenter] addObserver:self
-                                           selector:@selector(joinedSession)
-                                               name:@"SESSION_JOINED"
-                                             object:nil];
+  [self.spinny startAnimating];
   
   [[TextCollabrifyClient sharedClient] findSession];
 }
