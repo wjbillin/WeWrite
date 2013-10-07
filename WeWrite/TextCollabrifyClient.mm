@@ -19,7 +19,7 @@
 @end
 
 
-NSString* SESSION_NAME = @"bfdfladfdfbdkslkjzzzw";
+NSString* SESSION_NAME = @"bfdfladfdfbdkslkjzzzx";
 NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
 
 @implementation TextCollabrifyClient
@@ -122,6 +122,15 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
 
 - (void)client:(CollabrifyClient *)client endedSession:(int64_t)sessionID {
   [[NSNotificationCenter defaultCenter] postNotificationName:endedSessionNotificationName object:self];
+}
+
+- (void)client:(CollabrifyClient *)client encounteredError:(CollabrifyError *)error {
+  NSDictionary *dict = [[NSDictionary alloc] initWithObjects:@[error.description]
+                                                     forKeys:@[@"message"]];
+  
+  [[NSNotificationCenter defaultCenter] postNotificationName:encError
+                                                      object:self
+                                                    userInfo:dict];
 }
 
 - (void)sendActions:(Deque *)localActions {

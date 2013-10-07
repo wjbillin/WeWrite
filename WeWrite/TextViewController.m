@@ -30,8 +30,14 @@
     _undoButton = [[UIButton alloc] init];
     _redoButton = [[UIButton alloc] init];
     _exitButton = [[UIButton alloc] init];
+    
+    [self addObservers];
   }
   
+  return self;
+}
+
+- (void)addObservers {
   [[NSNotificationCenter defaultCenter] addObserver:self
                                            selector:@selector(renderIncomingEdits:)
                                                name:renderUpdatesNotificationName
@@ -41,7 +47,14 @@
                                                name:endedSessionNotificationName
                                              object:nil];
   
-  return self;
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(showError)
+                                               name:encError
+                                             object:nil];
+}
+
+- (void)removeObservers {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -109,7 +122,18 @@
   [self.delegate redo];
 }
 
+- (void)showError:(NSNotification *)notification {
+  
+  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Collabrify Client Error"
+                                                  message:[[notification userInfo] objectForKey:@"message"]
+                                                 delegate:nil
+                                        cancelButtonTitle:@"OK"
+                                        otherButtonTitles:nil];
+  [alert show];
+}
+
 - (void)exit {
+  [self removeObservers];
   [[TextCollabrifyClient sharedClient] deleteSession];
   [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
