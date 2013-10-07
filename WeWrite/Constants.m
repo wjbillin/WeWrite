@@ -10,3 +10,4 @@
 
 NSString *renderUpdatesDictName = @"EDITS_DICT";
 NSString *renderUpdatesNotificationName = @"renderTextEdits";
+NSString *encError = @"ENCOUNTERED_ERROR";

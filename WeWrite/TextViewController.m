@@ -37,6 +37,11 @@
                                                name:renderUpdatesNotificationName
                                              object:nil];
   
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(showError)
+                                               name:encError
+                                             object:nil];
+  
   return self;
 }
 
@@ -103,6 +108,16 @@
 
 - (void)redo {
   [self.delegate redo];
+}
+
+- (void)showError:(NSNotification *)notification {
+  
+  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Collabrify Client Error"
+                                                  message:[[notification userInfo] objectForKey:@"message"]
+                                                 delegate:nil
+                                        cancelButtonTitle:@"OK"
+                                        otherButtonTitles:nil];
+  [alert show];
 }
 
 - (void)exit {

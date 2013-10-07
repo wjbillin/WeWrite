@@ -120,6 +120,15 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
   }];
 }
 
+- (void)client:(CollabrifyClient *)client encounteredError:(CollabrifyError *)error {
+  NSDictionary *dict = [[NSDictionary alloc] initWithObjects:@[error.description]
+                                                     forKeys:@[@"message"]];
+  
+  [[NSNotificationCenter defaultCenter] postNotificationName:encError
+                                                      object:nil
+                                                    userInfo:dict];
+}
+
 - (void)sendActions:(Deque *)localActions {
   NSLog(@"The text did change. %d edits.", localActions.size);
   

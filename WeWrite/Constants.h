@@ -10,3 +10,4 @@
 
 extern NSString *renderUpdatesDictName;
 extern NSString *renderUpdatesNotificationName;
+extern NSString *encError;
