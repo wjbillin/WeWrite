@@ -120,6 +120,10 @@ NSString* EDIT_SERIES_EVENT = @"EDIT_SERIES_EVENT";
   }];
 }
 
+- (void)client:(CollabrifyClient *)client endedSession:(int64_t)sessionID {
+  [[NSNotificationCenter defaultCenter] postNotificationName:endedSessionNotificationName object:self];
+}
+
 - (void)sendActions:(Deque *)localActions {
   NSLog(@"The text did change. %d edits.", localActions.size);
   

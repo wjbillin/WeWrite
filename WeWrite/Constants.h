@@ -8,5 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
+extern NSString *endedSessionNotificationName;
 extern NSString *renderUpdatesDictName;
 extern NSString *renderUpdatesNotificationName;

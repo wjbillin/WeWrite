@@ -8,5 +8,6 @@
 
 #import "Constants.h"
 
+NSString *endedSessionNotificationName = @"endedSession";
 NSString *renderUpdatesDictName = @"EDITS_DICT";
 NSString *renderUpdatesNotificationName = @"renderTextEdits";

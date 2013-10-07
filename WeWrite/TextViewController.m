@@ -36,6 +36,10 @@
                                            selector:@selector(renderIncomingEdits:)
                                                name:renderUpdatesNotificationName
                                              object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(endedSession)
+                                               name:endedSessionNotificationName
+                                             object:nil];
   
   return self;
 }
@@ -108,6 +112,25 @@
 - (void)exit {
   [[TextCollabrifyClient sharedClient] deleteSession];
   [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)endedSession {
+  NSString *alertMessage = @"Sorry, the creator of this document has ended the session!";
+  UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Ended Session"
+                                                      message:alertMessage
+                                                     delegate:self
+                                            cancelButtonTitle:@"OK"
+                                            otherButtonTitles:nil, nil];
+  [alertView show];
+}
+
+#pragma mark -
+#pragma mark UIAlertViewDelegate
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+  if ([alertView.title isEqualToString:@"Ended Session"]) {
+    [self exit];
+  }
 }
 
 @end
