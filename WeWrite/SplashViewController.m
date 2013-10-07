@@ -62,6 +62,7 @@
 
 - (void)addSpinny {
   self.spinny.center = self.view.center;
+  [self.spinny setColor:[UIColor orangeColor]];
   [self.view addSubview:self.spinny];
   [self.spinny startAnimating];
 }
