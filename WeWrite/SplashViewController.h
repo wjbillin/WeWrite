@@ -11,7 +11,6 @@
 @class TextViewController;
 @interface SplashViewController : UIViewController
 
-@property (nonatomic, retain) TextViewController* textViewController;
 @property (nonatomic, retain) UIActivityIndicatorView* spinny;
 @property (nonatomic, retain) UIButton* joinButton;
 

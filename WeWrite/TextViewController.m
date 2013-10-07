@@ -107,7 +107,7 @@
 
 - (void)exit {
   [[TextCollabrifyClient sharedClient] deleteSession];
-  [self dismissViewControllerAnimated:YES completion:nil];
+  [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end

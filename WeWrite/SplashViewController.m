@@ -22,7 +22,6 @@
       // Custom initialization.
     _joinButton = [[UIButton alloc] init];
     _spinny = [[UIActivityIndicatorView alloc] init];
-    _textViewController = [[TextViewController alloc] init];
   }
 
   return self;
@@ -81,7 +80,8 @@
   [self.spinny stopAnimating];
   
   NSLog(@"Joined Session called");
-  [self presentViewController:self.textViewController animated:YES completion:nil];
+  TextViewController *textViewController = [[TextViewController alloc] init];
+  [self presentViewController:textViewController animated:YES completion:nil];
 }
 
 @end
