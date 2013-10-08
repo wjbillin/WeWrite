@@ -58,13 +58,13 @@
                       scale:(image.scale * 3.0)
                 orientation:(image.imageOrientation)];
   UIImageView *imageView = [[UIImageView alloc] initWithImage:scaledImage];
+  [imageView setCenter:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 100)];
   
   // Configure spinny wheel.
   self.spinny.center = self.view.center;
   [self.spinny setColor:[UIColor orangeColor]];
   
-  [imageView setCenter:CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds) - 100)];
-  
+  //
   [self.view addSubview:self.spinny];
   [self.view addSubview:imageView];
   [self.view addSubview:self.joinButton];
